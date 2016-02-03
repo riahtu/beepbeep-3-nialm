@@ -96,6 +96,16 @@ public class ElectricMooreMachine extends MooreMachine
 			m_name = name;
 			m_message = message;
 		}
+		
+		public String getName()
+		{
+			return m_name;
+		}
+		
+		public String getMessage()
+		{
+			return m_message;
+		}
 
 		@Override
 		public String toString()
