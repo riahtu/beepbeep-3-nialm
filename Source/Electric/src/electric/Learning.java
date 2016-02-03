@@ -1,0 +1,143 @@
+/*
+    BeepBeep, an event stream processor
+    Copyright (C) 2008-2015 Sylvain Hallé
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */package electric;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+
+import ca.uqac.lif.cep.Combiner;
+import ca.uqac.lif.cep.Connector;
+import ca.uqac.lif.cep.Fork;
+import ca.uqac.lif.cep.GroupProcessor;
+import ca.uqac.lif.cep.Processor;
+import ca.uqac.lif.cep.Pullable;
+import ca.uqac.lif.cep.SingleProcessor;
+import ca.uqac.lif.cep.eml.tuples.CombinableExpression;
+import ca.uqac.lif.cep.eml.tuples.Select;
+import ca.uqac.lif.cep.eml.tuples.TupleFeeder;
+import ca.uqac.lif.cep.eml.tuples.TupleGrammar;
+import ca.uqac.lif.cep.epl.CountDecimate;
+import ca.uqac.lif.cep.gnuplot.GnuplotProcessor;
+import ca.uqac.lif.cep.gnuplot.GnuplotScatterplot;
+import ca.uqac.lif.cep.interpreter.Interpreter;
+import ca.uqac.lif.cep.io.Caller;
+import ca.uqac.lif.cep.io.StreamReader;
+import ca.uqac.lif.cep.sets.BagUnion;
+import ca.uqac.lif.cep.sets.SetGrammar;
+import ca.uqac.lif.cep.signal.PeakFinderLocalMaximum;
+import ca.uqac.lif.cep.signal.PeakFinderTravelRise;
+import ca.uqac.lif.cep.signal.SignalGrammar;
+import ca.uqac.lif.cep.signal.Threshold;
+import ca.uqac.lif.cep.signal.Limiter;
+
+@SuppressWarnings("unused")
+public class Learning
+{
+
+	public static void main(String[] args)
+	{
+		String[] tools = {"test"};
+		for (String tool : tools)
+		{
+			for (int num_test = 1; num_test <= 5; num_test++)
+			{
+				detectPeakOnAppliance(tool, "WL1", num_test, true);
+				detectPlateauOnAppliance(tool, "WL1", num_test, true);
+			}
+		}
+		
+	}
+	
+	static void detectPeakOnAppliance(String appli, String component, int num_test, boolean to_plot)
+	{
+		String filename = "data/" + appli + num_test + ".csv";
+		// Get the reader from the filename
+		InputStream is = Utilities.getFileInputStream(filename);
+		StreamReader reader = new StreamReader(is);
+		// Connect a tuple feeder to the reader
+		TupleFeeder feeder = new TupleFeeder();
+		Connector.connect(reader, feeder);
+		// Fork the input
+		Fork fork = new Fork(2);
+		Connector.connect(feeder, fork);
+		// On first branch...
+		Select select_1;
+		{
+			// Filter a few columns from the tuples
+			select_1 = new Select(1, "TIME", "WL1", "WL2", "WL3", "VARL1", "VARL2", "VARL3");
+			select_1.setProcessor("", feeder);
+			Connector.connect(fork, select_1, 0, 0);
+		}
+		// On second branch...
+		PeakProcessor finder = new PeakProcessor(feeder, component, 100);
+		Connector.connect(fork, finder, 1, 0);
+		// Join the two outputs
+		Select select = new Select(2, "S.TIME", "S.WL1", "S.WL2", "S.WL3", "S.VARL1", "S.VARL2", "S.VARL3", "T.x");
+		select.setProcessor("S", select_1);
+		select.setProcessor("T", finder);
+		Connector.connect(select_1, select, 0, 0);
+		Connector.connect(finder, select, 0, 1);
+		// Plug into a plotter
+		Plotter plotter = new Plotter("S.TIME", "data/" + appli + num_test + ".pdf", "Raw signal", "Time(s)", "Power (W)");
+		Connector.connect(select, plotter);
+		plotter.plot(4);
+		plotter.close();
+	}
+	
+	static void detectPlateauOnAppliance(String appli, String component, int num_test, boolean to_plot)
+	{
+		String filename = "data/" + appli + num_test + ".csv";
+		// Get the reader from the filename
+		InputStream is = Utilities.getFileInputStream(filename);
+		StreamReader reader = new StreamReader(is);
+		// Connect a tuple feeder to the reader
+		TupleFeeder feeder = new TupleFeeder();
+		Connector.connect(reader, feeder);
+		// Fork the input
+		Fork fork = new Fork(2);
+		Connector.connect(feeder, fork);
+		// On first branch...
+		Select select_1;
+		{
+			// Filter a few columns from the tuples
+			select_1 = new Select(1, "TIME", "WL1", "WL2", "WL3", "VARL1", "VARL2", "VARL3");
+			select_1.setProcessor("", feeder);
+			Connector.connect(fork, select_1, 0, 0);
+		}
+		// On second branch...
+		PeakProcessor finder = new PeakProcessor(feeder, component, 100);
+		Connector.connect(fork, finder, 1, 0);
+		// Join the two outputs
+		Select select = new Select(2, "S.TIME", "S.WL1", "S.WL2", "S.WL3", "S.VARL1", "S.VARL2", "S.VARL3", "T.x");
+		select.setProcessor("S", select_1);
+		select.setProcessor("T", finder);
+		Connector.connect(select_1, select, 0, 0);
+		Connector.connect(finder, select, 0, 1);
+		// Plug into a plotter
+		Plotter plotter = new Plotter("S.TIME", "data/" + appli + num_test + "-plateau.pdf", "Raw signal", "Time(s)", "Power (W)");
+		Connector.connect(select, plotter);
+		plotter.plot(4);
+		plotter.close();
+	}
+}
