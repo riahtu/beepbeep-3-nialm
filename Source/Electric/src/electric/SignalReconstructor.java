@@ -80,7 +80,7 @@ public class SignalReconstructor extends SingleProcessor
 			}
 			else
 			{
-				nt.put(a_name, 0);
+				nt.put(a_name, 0f);
 			}
 		}
 		out[0] = nt;

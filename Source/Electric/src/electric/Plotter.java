@@ -1,6 +1,6 @@
 /*
     BeepBeep, an event stream processor
-    Copyright (C) 2008-2015 Sylvain Hallé
+    Copyright (C) 2008-2015 Sylvain Hallï¿½
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,13 +31,36 @@ import ca.uqac.lif.cep.sets.BagUnion;
 
 public class Plotter extends GroupProcessor
 {
-	public static final int s_decimateInterval = 1500;
+	public static final int s_decimateInterval = 200;
 	
 	public static final GnuplotProcessor.Terminal s_terminal = GnuplotProcessor.Terminal.PDF;
 	
 	public static final String s_gnuplotCommand = "gnuplot";
 	
 	private final FileWriter m_writer;
+	
+	private boolean m_pullHard = true;
+	
+	public Plotter(GnuplotStackedPlot plot, String x_axis, String filename, String title, String x_title, String y_title)
+	{
+		super(1, 0);
+		Combiner union = new Combiner(new BagUnion());
+		// Decimate the results (keep one every 200)
+		CountDecimate decimate = new CountDecimate(s_decimateInterval);
+		Connector.connect(union, decimate);
+		// Connect a Gnuplot to the decimated results
+		plot.setX(x_axis).setRaw(true).setTerminal(s_terminal).setTitle(title);
+		plot.setXTitle(x_title).setYTitle(y_title);
+		Connector.connect(decimate, plot);
+		// Connect a caller to gnuplot on the plot
+		Caller gnuplot = new Caller(s_gnuplotCommand);
+		Connector.connect(plot, gnuplot);
+		m_writer = new FileWriter(new File(filename), false);
+		Connector.connect(gnuplot, m_writer);
+		// Bundle
+		addProcessors(union, decimate, plot, gnuplot, m_writer);
+		this.associateInput(0, union, 0);
+	}
 
 	public Plotter(String x_axis, String filename, String title, String x_title, String y_title)
 	{
@@ -61,6 +84,12 @@ public class Plotter extends GroupProcessor
 		this.associateInput(0, union, 0);
 	}
 	
+	public Plotter setPullHard(boolean b)
+	{
+		m_pullHard = b;
+		return this;
+	}
+	
 	public Plotter close()
 	{
 		if (m_writer != null)
@@ -74,14 +103,28 @@ public class Plotter extends GroupProcessor
 	{
 		for (int i = 0; i < repetitions; i++)
 		{
-			m_writer.pullHard();
+			if (m_pullHard)
+			{
+				m_writer.pullHard();
+			}
+			else
+			{
+				m_writer.pull();
+			}
 		}
 		return this;
 	}
 	
 	public Plotter plot()
 	{
-		m_writer.pullHard();
+		if (m_pullHard)
+		{
+			m_writer.pullHard();
+		}
+		else
+		{
+			m_writer.pull();
+		}
 		return this;
 	}
 }

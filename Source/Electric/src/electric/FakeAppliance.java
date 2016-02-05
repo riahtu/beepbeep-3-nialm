@@ -22,7 +22,7 @@ public class FakeAppliance extends Source
 	
 	protected float m_currentTimePoint;
 	
-	protected static float s_noiseRatio = 0f; 
+	protected static float s_noiseInterval = 0f; 
 	
 	protected static final Random s_random = new Random();
 
@@ -40,7 +40,7 @@ public class FakeAppliance extends Source
 	
 	public void setNoiseRatio(float ratio)
 	{
-		s_noiseRatio = ratio;
+		s_noiseInterval = ratio;
 	}
 	
 	public String getName()
@@ -72,7 +72,7 @@ public class FakeAppliance extends Source
 	
 	protected static float getValueWithNoise(float x)
 	{
-		return x + x * ((s_random.nextFloat() - 0.5f) * 2f * s_noiseRatio);
+		return x + (s_random.nextFloat() * s_noiseInterval);
 	}
 
 }

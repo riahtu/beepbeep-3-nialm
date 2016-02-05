@@ -10,8 +10,12 @@ import ca.uqac.lif.cep.Pullable;
 import ca.uqac.lif.cep.SmartFork;
 import ca.uqac.lif.cep.eml.tuples.AttributeDefinitionAs;
 import ca.uqac.lif.cep.eml.tuples.AttributeNameQualified;
+import ca.uqac.lif.cep.eml.tuples.NamedTupleMap;
 import ca.uqac.lif.cep.eml.tuples.Select;
+import ca.uqac.lif.cep.epl.CountDecimate;
+import ca.uqac.lif.cep.epl.Delay;
 import ca.uqac.lif.cep.epl.Insert;
+import ca.uqac.lif.cep.gnuplot.GnuplotScatterplot;
 
 public class CompoundTest
 {
@@ -23,12 +27,14 @@ public class CompoundTest
 		String[] letters = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O"};
 		float time_step = 1/60f;
 		Set<FakeAppliance> appliances = new HashSet<FakeAppliance>();
-		appliances.add(new FakeAppliance("Kettle", 500, 500, 2, 3, time_step));
-		appliances.add(new FakeAppliance("Coffee pot", 1000, 1000, 1, 4, time_step));
+		appliances.add(new FakeAppliance("Kettle", 500, 500, 2, 4, time_step));
+		appliances.add(new FakeAppliance("Coffee pot", 1000, 1000, 1, 3, time_step));
+		appliances.add(new FakeAppliance("Toaster", 3000, 3000, 1.5f, 5f, time_step));
+		FakeAppliance.s_noiseInterval = 2f;
 		FakeApplianceSet fas = new FakeApplianceSet(appliances, time_step);
 		
 		// Fork the input
-		SmartFork fork1 = new SmartFork(2 * components.length + 1);
+		SmartFork fork1 = new SmartFork(2 * components.length + 2);
 		Connector.connect(fas, fork1);
 		// Send each fork to a different signal processor
 		Processor[] signal = new Processor[2 * components.length];
@@ -77,20 +83,24 @@ public class CompoundTest
 		}
 		Connector.connect(fork1, select, 2 * components.length, 2 * components.length);
 		// Fork the output again for as many appliances we have
-		Processor[] machines = new Processor[2];
+		Processor[] machines = new Processor[3];
 		SmartFork fork2 = new SmartFork(machines.length);
 		Connector.connect(select, fork2);
 		{
 			// Coffee
-			machines[0] = new ElectricMooreMachine("Kettle", "WL1", 500, 500, 500, 20);
+			machines[0] = new ElectricMooreMachine("Kettle", "WL1", 500, 500, 500, 120);
 			Connector.connect(fork2, machines[0], 0, 0);
 		}
 		{
 			// Blender
-			machines[1] = new ElectricMooreMachine("Coffee pot", "WL1", 1000, 1000, 1000, 20);
+			machines[1] = new ElectricMooreMachine("Coffee pot", "WL1", 1000, 1000, 1000, 120);
 			Connector.connect(fork2, machines[1], 1, 0);
 		}
-
+		{
+			// Toaster
+			machines[2] = new ElectricMooreMachine("Toaster", "WL1", 3000, 3000, 3000, 120);
+			Connector.connect(fork2, machines[2], 2, 0);
+		}
 		// And merge again to get a single trace
 		Multiplexer mux = new Multiplexer(machines.length);
 		for (int i = 0; i < machines.length; i++)
@@ -100,8 +110,29 @@ public class CompoundTest
 		// Create load reconstructor
 		SignalReconstructor sr = new SignalReconstructor(appliances);
 		Connector.connect(mux, sr);
-		Pullable p = sr.getPullableOutput(0);
-		for (int i = 0; i < 6000; i++)
+		PersistentProcessor pp = new PersistentProcessor(1);
+		NamedTupleMap[] init = new NamedTupleMap[1];
+		init[0] = new NamedTupleMap();
+		init[0].put("Kettle", 0f);
+		init[0].put("Coffee pot", 0f);
+		init[0].put("Toaster", 0f);
+		pp.setInitialEvent(init);
+		Connector.connect(sr, pp);
+		// Reinject timestamp into event
+		// Normally, we should get the timestamp from the fork
+		Delay decim = new Delay(15);
+		Connector.connect(pp, decim);
+		TimeStampInjector tsi = new TimeStampInjector();
+		Connector.connect(decim, tsi, 0, 0);
+		Connector.connect(fork1, tsi, 2 * components.length + 1, 1);
+		// Graph that
+		//Plotter plotter = new Plotter("TIME", "mystack.pdf", "My stacked plot", "Time", "Power").setPullHard(false);
+		Plotter plotter = new Plotter(new GnuplotStackedPlot(), "TIME", "mystack.pdf", "My stacked plot", "Time", "Power").setPullHard(false);
+		Connector.connect(tsi, plotter);
+		plotter.plot(1000);
+		System.exit(0);
+		Pullable p = tsi.getPullableOutput(0);
+		for (int i = 0; i < 600; i++)
 		{
 			Object o = p.pull();
 			if (o != null)

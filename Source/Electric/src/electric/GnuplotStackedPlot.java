@@ -22,15 +22,15 @@ public class GnuplotStackedPlot extends GnuplotScatterplot
 		out.append("plot ");
 		for (int i = 0; i < m_otherHeaders.length; i++)
 		{
-			String header = m_otherHeaders[i];
+			String header = m_otherHeaders[m_otherHeaders.length - i - 1];
 			if (i > 0)
 			{
 				out.append(", ");
 			}
-			out.append("\"-\" u 1:($2+");
-			for (int j = 3; j < m_otherHeaders.length; j++)
+			out.append("\"-\" u 1:($2");
+			for (int j = 3; j < (m_otherHeaders.length - i) + 2; j++)
 			{
-				out.append("$").append(j);
+				out.append("+$").append(j);
 			}
 			out.append(") t \"").append(header).append("\" w filledcurves x1");
 		}
