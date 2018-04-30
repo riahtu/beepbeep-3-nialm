@@ -3,7 +3,8 @@ package electric;
 import java.util.Queue;
 import java.util.Random;
 
-import ca.uqac.lif.cep.epl.Source;
+import ca.uqac.lif.cep.Processor;
+import ca.uqac.lif.cep.tmf.Source;
 
 
 public class FakeAppliance extends Source
@@ -54,7 +55,7 @@ public class FakeAppliance extends Source
 	}
 
 	@Override
-	protected Queue<Object[]> compute(Object[] arg0)
+	protected boolean compute(Object[] arg0, Queue<Object[]> outputs)
 	{
 		Float[] out = new Float[1];
 		out[0] = 0f;
@@ -67,12 +68,20 @@ public class FakeAppliance extends Source
 			out[0] = getValueWithNoise(m_plateau);
 		}
 		m_currentTimePoint += m_increment;
-		return wrapVector(out);
+		outputs.add(out);
+		return true;
 	}
 	
 	protected static float getValueWithNoise(float x)
 	{
 		return x + (s_random.nextFloat() * s_noiseInterval);
+	}
+
+	@Override
+	public Processor duplicate(boolean with_state)
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

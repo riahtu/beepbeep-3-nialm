@@ -1,13 +1,15 @@
 package electric;
 
-import ca.uqac.lif.cep.eml.tuples.AttributeNameQualified;
-import ca.uqac.lif.cep.eml.tuples.Conjunction;
-import ca.uqac.lif.cep.eml.tuples.GreaterThan;
-import ca.uqac.lif.cep.eml.tuples.LessThan;
-import ca.uqac.lif.cep.eml.tuples.NumberExpression;
-import ca.uqac.lif.cep.eml.tuples.Select;
-import ca.uqac.lif.cep.ltl.MooreMachine;
-import ca.uqac.lif.cep.ltl.ProcessorTransition;
+import ca.uqac.lif.cep.tuples.FetchAttribute;
+import ca.uqac.lif.cep.util.Booleans;
+import ca.uqac.lif.cep.util.Numbers;
+import ca.uqac.lif.cep.fsm.FunctionTransition;
+import ca.uqac.lif.cep.fsm.MooreMachine;
+import ca.uqac.lif.cep.fsm.TransitionOtherwise;
+import ca.uqac.lif.cep.functions.Constant;
+import ca.uqac.lif.cep.functions.Function;
+import ca.uqac.lif.cep.functions.FunctionTree;
+import ca.uqac.lif.cep.functions.StreamVariable;
 
 public class ElectricMooreMachine extends MooreMachine
 {
@@ -32,57 +34,60 @@ public class ElectricMooreMachine extends MooreMachine
 	public ElectricMooreMachine(String app_name, String component, int peak, int plateau, int drop, int interval)
 	{
 		super(1, 1);
-		AttributeNameQualified anq_peak = new AttributeNameQualified("PK-" + component);
-		AttributeNameQualified anq_plateau = new AttributeNameQualified("PT-" + component);
+		String anq_peak = "PK-" + component;
+		String anq_plateau = "PT-" + component;
 		// Create transition relation
-		addTransition(ST_0, new ProcessorTransition(ST_1,
-				// in state 0, event = peak, go to state 1
-				withinRange(anq_peak, peak, interval)));
+		addTransition(ST_0, new FunctionTransition(// in state 0, event = peak, go to state 1
+		withinRange(anq_peak, peak, interval),
+				ST_1));
 		addTransition(ST_0,
 				// in state 0, event = otherwise, go to state 0
 				new TransitionOtherwise(ST_0));
-		addTransition(ST_1, new ProcessorTransition(ST_2,
-				// in state 1, event = plateau, go to state 2
-				withinRange(anq_plateau, plateau, interval)));
+		addTransition(ST_1, new FunctionTransition(// in state 1, event = plateau, go to state 2
+		withinRange(anq_plateau, plateau, interval),
+				ST_2));
 		addTransition(ST_1,
 				// in state 1, event = otherwise, go to state 1
 				new TransitionOtherwise(ST_1));
-		addTransition(ST_2, new ProcessorTransition(ST_3,
-				// in state 2, event = drop, go to state 3
-				withinRange(anq_peak, drop, interval)));
+		addTransition(ST_2, new FunctionTransition(// in state 2, event = drop, go to state 3
+		withinRange(anq_peak, drop, interval),
+				ST_3));
 		addTransition(ST_2,
 				// in state 2, event = otherwise, go to state 4
 				new TransitionOtherwise(ST_4));
-		addTransition(ST_3, new ProcessorTransition(ST_1,
-				// in state 3, event = peak, go to state 1
-				withinRange(anq_peak, peak, interval)));
+		addTransition(ST_3, new FunctionTransition(// in state 3, event = peak, go to state 1
+		withinRange(anq_peak, peak, interval),
+				ST_1));
 		addTransition(ST_3,
 				// in state 3, event = otherwise, go to state 0
 				new TransitionOtherwise(ST_0));
-		addTransition(ST_4, new ProcessorTransition(ST_3,
-				// in state 4, event = drop, go to state 3
-				withinRange(anq_peak, drop, interval)));
+		addTransition(ST_4, new FunctionTransition(// in state 4, event = drop, go to state 3
+		withinRange(anq_peak, drop, interval),
+				ST_3));
 		addTransition(ST_4,
 				// in state 4, event = otherwise, go to state 4
 				new TransitionOtherwise(ST_4));
 		// Add symbols to some states
-		addSymbol(ST_2, new ApplianceOn(app_name));
-		addSymbol(ST_3, new ApplianceOff(app_name));
+		addSymbol(ST_2, new Constant(new ApplianceOn(app_name)));
+		addSymbol(ST_3, new Constant (new ApplianceOff(app_name)));
 	}
 
 	/**
 	 * Generate a transition expressing the fact that a value is within a range
-	 * (i.e. a <code>SELECT</code> expression)
 	 * @param value The value
 	 * @param interval The half-width of the range
 	 * @return The condition
 	 */
-	private static Select withinRange(AttributeNameQualified component, int value, int interval)
+	private static Function withinRange(String component, int value, int interval)
 	{
-		GreaterThan gt1 = new GreaterThan(component, new NumberExpression(value - interval));
-		LessThan lt1 = new LessThan(component, new NumberExpression(value + interval));
-		Conjunction and = new Conjunction(gt1, lt1);
-		return new Select(1, and);
+		FunctionTree ft = new FunctionTree(Booleans.and,
+				new FunctionTree(Numbers.isGreaterThan, 
+						new FunctionTree(new FetchAttribute(component), StreamVariable.X),
+						new Constant(value - interval)),
+				new FunctionTree(Numbers.isLessThan, 
+						new FunctionTree(new FetchAttribute(component), StreamVariable.X),
+						new Constant(value + interval)));
+		return ft;
 	}
 
 	public static abstract class ApplianceEvent

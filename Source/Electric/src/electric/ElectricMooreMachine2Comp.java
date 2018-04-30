@@ -6,8 +6,12 @@ import ca.uqac.lif.cep.eml.tuples.GreaterThan;
 import ca.uqac.lif.cep.eml.tuples.LessThan;
 import ca.uqac.lif.cep.eml.tuples.NumberExpression;
 import ca.uqac.lif.cep.eml.tuples.Select;
-import ca.uqac.lif.cep.ltl.MooreMachine;
-import ca.uqac.lif.cep.ltl.ProcessorTransition;
+import ca.uqac.lif.cep.fsm.MooreMachine;
+import ca.uqac.lif.cep.fsm.ProcessorTransition;
+import ca.uqac.lif.cep.fsm.TransitionOtherwise;
+import ca.uqac.lif.cep.functions.Constant;
+import ca.uqac.lif.cep.functions.FunctionTree;
+import ca.uqac.lif.cep.util.Booleans;
 
 public class ElectricMooreMachine2Comp extends MooreMachine
 {
@@ -68,8 +72,8 @@ public class ElectricMooreMachine2Comp extends MooreMachine
 				// in state 4, event = otherwise, go to state 4
 				new TransitionOtherwise(ST_4));
 		// Add symbols to some states
-		addSymbol(ST_2, new ElectricMooreMachine.ApplianceOn(app_name));
-		addSymbol(ST_3, new ElectricMooreMachine.ApplianceOff(app_name));
+		addSymbol(ST_2, new Constant(new ElectricMooreMachine.ApplianceOn(app_name)));
+		addSymbol(ST_3, new Constant(new ElectricMooreMachine.ApplianceOff(app_name)));
 	}
 
 	/**
@@ -79,10 +83,10 @@ public class ElectricMooreMachine2Comp extends MooreMachine
 	 * @param interval The half-width of the range
 	 * @return The condition
 	 */
-	private static Select withinRange(AttributeNameQualified component1, AttributeNameQualified component2, int value, int interval)
+	private static FunctionTree withinRange(AttributeNameQualified component1, AttributeNameQualified component2, int value, int interval)
 	{
-		Conjunction and1 = null;
-		Conjunction and2 = null;
+		FunctionTree and1 = null;
+		FunctionTree and2 = null;
 		{
 			GreaterThan gt1 = new GreaterThan(component1, new NumberExpression(value - interval));
 			LessThan lt1 = new LessThan(component1, new NumberExpression(value + interval));

@@ -5,10 +5,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.Pullable;
-import ca.uqac.lif.cep.eml.tuples.NamedTuple;
-import ca.uqac.lif.cep.eml.tuples.NamedTupleMap;
-import ca.uqac.lif.cep.epl.Source;
+import ca.uqac.lif.cep.tuples.Tuple;
+import ca.uqac.lif.cep.tuples.TupleMap;
+import ca.uqac.lif.cep.tmf.Source;
 
 
 public class FakeApplianceSet extends Source
@@ -40,14 +41,14 @@ public class FakeApplianceSet extends Source
 	}
 
 	@Override
-	protected Queue<Object[]> compute(Object[] inputs)
+	protected boolean compute(Object[] inputs, Queue<Object[]> outputs)
 	{
-		NamedTuple[] out = new NamedTuple[1];
-		NamedTupleMap ntm = new NamedTupleMap();
+		Tuple[] out = new Tuple[1];
+		TupleMap ntm = new TupleMap();
 		float total = 0;
 		for (Pullable p : m_appliances)
 		{
-			float f = (float) p.pull();
+			float f = (Float) p.pull();
 			total += f;
 		}
 		// At the moment, we put everything on a single phase
@@ -55,13 +56,21 @@ public class FakeApplianceSet extends Source
 		ntm.put("TIME", m_currentTimePoint);
 		out[0] = ntm;
 		m_currentTimePoint += m_increment;
-		return wrapVector(out);
+		outputs.add(out);
+		return true;
 	}
 	
 	public FakeApplianceSet addAppliance(FakeAppliance a)
 	{
 		m_appliances.add(a.getPullableOutput(0));
 		return this;
+	}
+
+	@Override
+	public Processor duplicate(boolean with_state)
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

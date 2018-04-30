@@ -1,6 +1,6 @@
 /*
     BeepBeep, an event stream processor
-    Copyright (C) 2008-2015 Sylvain Hallé
+    Copyright (C) 2008-2015 Sylvain Hallï¿½
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,9 +20,10 @@ package electric;
 import ca.uqac.lif.cep.Connector;
 import ca.uqac.lif.cep.GroupProcessor;
 import ca.uqac.lif.cep.Processor;
-import ca.uqac.lif.cep.eml.tuples.Select;
+import ca.uqac.lif.cep.functions.ApplyFunction;
 import ca.uqac.lif.cep.signal.Limiter;
 import ca.uqac.lif.cep.signal.PlateauFinder;
+import ca.uqac.lif.cep.tuples.FetchAttribute;
 
 class PlateauProcessor extends GroupProcessor
 {
@@ -36,7 +37,7 @@ class PlateauProcessor extends GroupProcessor
 	{
 		super(1, 1);
 		// Keep a single attribute
-		Select select = new Select(1, component);
+		ApplyFunction select = new ApplyFunction(new FetchAttribute(component));
 		//select.setProcessor("", input);
 		// Pass through peak detector
 		Processor finder = new PlateauFinder().setPlateauRange(range).setRelative(true);

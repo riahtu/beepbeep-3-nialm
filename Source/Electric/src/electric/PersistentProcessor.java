@@ -1,7 +1,10 @@
 package electric;
 
+import java.util.Iterator;
 import java.util.Queue;
+import java.util.concurrent.Future;
 
+import ca.uqac.lif.cep.NextStatus;
 import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.Pullable;
 import ca.uqac.lif.cep.Pushable;
@@ -100,10 +103,33 @@ public class PersistentProcessor extends Processor
 			return this;
 		}
 
-		@Override
 		public int getPushCount()
 		{
 			return m_pushCount;
+		}
+
+		@Override
+		public Future<Pushable> pushFast(Object o) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public void notifyEndOfTrace() throws PushableException {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public Processor getProcessor() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public int getPosition() {
+			// TODO Auto-generated method stub
+			return 0;
 		}
 	}
 	
@@ -133,16 +159,15 @@ public class PersistentProcessor extends Processor
 			m_pullCount = 0;
 		}
 
-		@Override
 		public int getPullCount()
 		{
 			return m_pullCount;
 		}
 
 		@Override
-		public Object pull()
+		public Object pullSoft()
 		{
-			if (hasNext() != NextStatus.YES)
+			if (!hasNext())
 			{
 				return null;
 			}
@@ -159,9 +184,9 @@ public class PersistentProcessor extends Processor
 		}
 
 		@Override
-		public Object pullHard()
+		public Object pull()
 		{
-			if (hasNextHard() != NextStatus.YES)
+			if (!hasNext())
 			{
 				return null;
 			}				
@@ -178,36 +203,36 @@ public class PersistentProcessor extends Processor
 		}
 
 		@Override
-		public NextStatus hasNext()
+		public boolean hasNext()
 		{
 			Queue<Object> out_queue = m_outputQueues[m_index];
 			// If an event is already waiting in the output queue,
 			// return it and don't pull anything from the input
 			if (!out_queue.isEmpty())
 			{
-				return NextStatus.YES;
+				return true;
 			}
 			// Check if each pullable has an event ready
 			for (int i = 0; i < m_inputArity; i++)
 			{
 				Pullable p = m_inputPullables[i];
 				assert p != null;
-				NextStatus status = p.hasNext();
-				if (status != NextStatus.YES)
+				boolean status = p.hasNext();
+				if (!status)
 				{
-					// One of the input pullables has no event ready;
-					// put in the output queue the last set of events
 					if (m_last[0] == null)
 					{
 						// NOTE: we use m_last[0] == null as a surrogate to
 						// check whether some event was received
-						return NextStatus.MAYBE;
+						return false;
 					}
+					// One of the input pullables has no event ready;
+					// put in the output queue the last set of events
 					for (int j = 0; j < m_last.length; j++)
 					{
 						m_outputQueues[j].add(m_last[j]);
 					}
-					return NextStatus.YES;
+					return true;
 				}
 			}
 			// We are here only if every input pullable has answered YES
@@ -219,54 +244,63 @@ public class PersistentProcessor extends Processor
 				m_outputQueues[i].add(o);
 				m_last[i] = o;
 			}
-			return NextStatus.YES;
+			return true;
 		}
 
 		@Override
-		public NextStatus hasNextHard()
+		public Iterator<Object> iterator() 
 		{
-			Queue<Object> out_queue = m_outputQueues[m_index];
-			// If an event is already waiting in the output queue,
-			// return it and don't pull anything from the input
-			if (!out_queue.isEmpty())
-			{
-				return NextStatus.YES;
-			}
-			// Check if each pullable has an event ready
-			for (int i = 0; i < m_inputArity; i++)
-			{
-				Pullable p = m_inputPullables[i];
-				assert p != null;
-				NextStatus status = p.hasNextHard();
-				if (status == NextStatus.NO)
-				{
-					if (m_last[0] == null)
-					{
-						// NOTE: we use m_last[0] == null as a surrogate to
-						// check whether some event was received
-						return NextStatus.NO;
-					}
-					// One of the input pullables has no event ready;
-					// put in the output queue the last set of events
-					for (int j = 0; j < m_last.length; j++)
-					{
-						m_outputQueues[j].add(m_last[j]);
-					}
-					return NextStatus.YES;
-				}
-			}
-			// We are here only if every input pullable has answered YES
-			// Pull an event from each
-			for (int i = 0; i < m_inputArity; i++)
-			{
-				Pullable p = m_inputPullables[i];
-				Object o = p.pullHard();
-				m_outputQueues[i].add(o);
-				m_last[i] = o;
-			}
-			return NextStatus.YES;
+			return this;
+		}
+
+		@Override
+		public Object next()
+		{
+			return pull();
+		}
+
+		@Override
+		public NextStatus hasNextSoft() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public Processor getProcessor() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public int getPosition() {
+			// TODO Auto-generated method stub
+			return 0;
+		}
+
+		@Override
+		public void start() {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void stop() {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void dispose() {
+			// TODO Auto-generated method stub
+			
 		}
 		
+	}
+
+	@Override
+	public Processor duplicate(boolean with_state) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }
