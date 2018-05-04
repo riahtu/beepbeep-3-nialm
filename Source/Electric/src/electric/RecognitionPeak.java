@@ -1,6 +1,6 @@
 /*
     BeepBeep, an event stream processor
-    Copyright (C) 2008-2015 Sylvain Hallé
+    Copyright (C) 2008-2015 Sylvain Hallï¿½
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,14 +22,11 @@ import java.io.InputStream;
 import ca.uqac.lif.cep.Connector;
 import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.Pullable;
-import ca.uqac.lif.cep.SmartFork;
-import ca.uqac.lif.cep.eml.tuples.AttributeDefinitionAs;
-import ca.uqac.lif.cep.eml.tuples.AttributeNameQualified;
-import ca.uqac.lif.cep.eml.tuples.Select;
-import ca.uqac.lif.cep.eml.tuples.TupleFeeder;
-import ca.uqac.lif.cep.epl.Delay;
-import ca.uqac.lif.cep.epl.Insert;
-import ca.uqac.lif.cep.io.StreamReader;
+import ca.uqac.lif.cep.tmf.Fork;
+import ca.uqac.lif.cep.tuples.MergeScalars;
+import ca.uqac.lif.cep.tuples.TupleFeeder;
+import ca.uqac.lif.cep.functions.ApplyFunction;
+import ca.uqac.lif.cep.io.ReadLines;
 import electric.ElectricMooreMachine.ApplianceEvent;
 
 public class RecognitionPeak
@@ -42,34 +39,28 @@ public class RecognitionPeak
 		String filename = "data/test" + num_test + ".csv";
 		// Get the reader from the filename
 		InputStream is = Utilities.getFileInputStream(filename);
-		StreamReader reader = new StreamReader(is);
+		ReadLines reader = new ReadLines(is);
 		// Connect a tuple feeder to the reader
 		TupleFeeder feeder = new TupleFeeder();
 		Connector.connect(reader, feeder);
 		// Fork the input
-		SmartFork fork1 = new SmartFork(3);
+		Fork fork1 = new Fork(3);
 		Connector.connect(feeder, fork1);
 		// Send each fork to a different signal processor
 		Processor[] signal = new Processor[2];
 		signal[0] = new PeakProcessor(null, "WL1", 150); 
-		Connector.connect(fork1, signal[0], 0, 0);
+		Connector.connect(fork1, 0, signal[0], 0);
 		PlateauProcessor pp = new PlateauProcessor(null, "WL1", 150);
-		Connector.connect(fork1, pp, 1, 0);
+		Connector.connect(fork1, 1, pp, 0);
 		Object[] dummy_pad = {0};
 		Insert in = new Insert(dummy_pad, 4);
 		Connector.connect(pp, in);
 		signal[1] = in;
 		// Merge all the outputs in a single event
-		Select select = new Select(3, 
-				new AttributeDefinitionAs(new AttributeNameQualified("A", "*"), "PK-WL1"),
-				new AttributeDefinitionAs(new AttributeNameQualified("B", "*"), "PT-WL1"),
-				new AttributeDefinitionAs(new AttributeNameQualified("C", "TIME"), "TIME"));
-		select.setProcessor("A", signal[0]);
-		select.setProcessor("B", signal[1]);
-		select.setProcessor("C", feeder);
-		Connector.connect(signal[0], select, 0, 0);
-		Connector.connect(signal[1], select, 0, 1);
-		Connector.connect(fork1, select, 2, 2);
+		ApplyFunction select = new ApplyFunction(new MergeScalars("PK-WL1", "PT-WL1", "TIME"));
+		Connector.connect(signal[0], 0, select, 0);
+		Connector.connect(signal[1], 0, select, 1);
+		Connector.connect(fork1, 2, select, 2);
 
 		// Plug that into a plotter
 		/*
@@ -79,18 +70,18 @@ public class RecognitionPeak
 		plotter.plot(4);
 		*/
 		// Fork the output again for as many appliances we have
-		SmartFork fork2 = new SmartFork(2);
+		Fork fork2 = new Fork(2);
 		Connector.connect(select, fork2);
 		ElectricMooreMachine[] machines = new ElectricMooreMachine[2];
 		{
 			// Kettle
 			machines[0] = new ElectricMooreMachine("Coffee", "WL1", 939, 939, 939, 150);
-			Connector.connect(fork2, machines[0], 0, 0);
+			Connector.connect(fork2, 0, machines[0], 0);
 		}
 		Pullable p = machines[0].getPullableOutput(0);
-		ApplianceEvent ae = (ApplianceEvent) p.pullHard();
+		ApplianceEvent ae = (ApplianceEvent) p.pull();
 		System.out.println(ae);
-		ae = (ApplianceEvent) p.pullHard();
+		ae = (ApplianceEvent) p.pull();
 		System.out.println(ae);
 	}
 

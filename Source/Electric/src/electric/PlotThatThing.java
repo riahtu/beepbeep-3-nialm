@@ -3,8 +3,8 @@ package electric;
 import java.io.InputStream;
 
 import ca.uqac.lif.cep.Connector;
-import ca.uqac.lif.cep.eml.tuples.TupleFeeder;
-import ca.uqac.lif.cep.io.StreamReader;
+import ca.uqac.lif.cep.tuples.TupleFeeder;
+import ca.uqac.lif.cep.io.ReadLines;
 
 public class PlotThatThing
 {
@@ -15,7 +15,7 @@ public class PlotThatThing
 		
 		
 		InputStream is = Utilities.getFileInputStream(filename);
-		StreamReader reader = new StreamReader(is);
+		ReadLines reader = new ReadLines(is);
 		// Connect a tuple feeder to the reader
 		TupleFeeder feeder = new TupleFeeder();
 		Connector.connect(reader, feeder);

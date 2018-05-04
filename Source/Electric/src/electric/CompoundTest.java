@@ -6,17 +6,12 @@ import java.util.Set;
 import ca.uqac.lif.cep.Connector;
 import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.Pullable;
-import ca.uqac.lif.cep.eml.tuples.AttributeDefinitionAs;
-import ca.uqac.lif.cep.eml.tuples.AttributeNameQualified;
-import ca.uqac.lif.cep.eml.tuples.NamedTupleMap;
-import ca.uqac.lif.cep.eml.tuples.Select;
-import ca.uqac.lif.cep.tmf.CountDecimate;
-import ca.uqac.lif.cep.epl.Delay;
-import ca.uqac.lif.cep.epl.Insert;
-import ca.uqac.lif.cep.gnuplot.GnuplotScatterplot;
+import ca.uqac.lif.cep.functions.ApplyFunction;
+import ca.uqac.lif.cep.tuples.TupleMap;
+import ca.uqac.lif.cep.tuples.MergeScalars;
 import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.Multiplex;
-import ca.uqac.lif.cep.tuples.TupleMap;
+import ca.uqac.lif.cep.tmf.Trim;
 
 public class CompoundTest
 {
@@ -58,31 +53,16 @@ public class CompoundTest
 		}
 		// Merge all the outputs in a single event
 		int symb_count = 0;
-		Select select = new Select(2 * components.length + 1, 
-				new AttributeDefinitionAs(new AttributeNameQualified(letters[symb_count++], "*"), "PK-WL1"),
-				/*new AttributeDefinitionAs(new AttributeNameQualified(letters[symb_count++], "*"), "PK-WL2"),
-				new AttributeDefinitionAs(new AttributeNameQualified(letters[symb_count++], "*"), "PK-WL3"),
-				new AttributeDefinitionAs(new AttributeNameQualified(letters[symb_count++], "*"), "PK-VARL1"),
-				new AttributeDefinitionAs(new AttributeNameQualified(letters[symb_count++], "*"), "PK-VARL2"),
-				new AttributeDefinitionAs(new AttributeNameQualified(letters[symb_count++], "*"), "PK-VARL3"),*/
-				new AttributeDefinitionAs(new AttributeNameQualified(letters[symb_count++], "*"), "PT-WL1"),
-				/*new AttributeDefinitionAs(new AttributeNameQualified(letters[symb_count++], "*"), "PT-WL2"),
-				new AttributeDefinitionAs(new AttributeNameQualified(letters[symb_count++], "*"), "PT-WL3"),
-				new AttributeDefinitionAs(new AttributeNameQualified(letters[symb_count++], "*"), "PT-VARL1"),
-				new AttributeDefinitionAs(new AttributeNameQualified(letters[symb_count++], "*"), "PT-VARL2"),
-				new AttributeDefinitionAs(new AttributeNameQualified(letters[symb_count++], "*"), "PT-VARL3"),*/
-				new AttributeDefinitionAs(new AttributeNameQualified(letters[symb_count++], "TIME"), "TIME"));
+    ApplyFunction select = new ApplyFunction(new MergeScalars("PK-WL1", /*"PK-WL2", "PK-WL3", 
+        "PK-VARL1", "PK-VARL2", "PK-VARL3",*/
+        "PT-WL1", /*"PT-WL2", "PT-WL3",
+        "PT-VARL1", "PT-VARL2", "PT-VARL3",*/ "TIME"));
 		symb_count = 0;
 		for (int i = 0; i < 2 * components.length; i++)
 		{
-			select.setProcessor(letters[symb_count++], null);
+			Connector.connect(signal[i], 0, select, i);
 		}
-		select.setProcessor(letters[symb_count++], null);
-		for (int i = 0; i < 2 * components.length; i++)
-		{
-			Connector.connect(signal[i], select, 0, i);
-		}
-		Connector.connect(fork1, select, 2 * components.length, 2 * components.length);
+		Connector.connect(fork1, 2 * components.length, select, 2 * components.length);
 		// Fork the output again for as many appliances we have
 		Processor[] machines = new Processor[3];
 		Fork fork2 = new Fork(machines.length);
@@ -121,10 +101,10 @@ public class CompoundTest
 		Connector.connect(sr, pp);
 		// Reinject timestamp into event
 		// Normally, we should get the timestamp from the fork
-		Delay decim = new Delay(15);
+		Trim decim = new Trim(15); // Was a Delay processor before
 		Connector.connect(pp, decim);
 		TimeStampInjector tsi = new TimeStampInjector();
-		Connector.connect(decim, tsi, 0, 0);
+		Connector.connect(decim, 0, tsi, 0);
 		Connector.connect(fork1, 2 * components.length + 1, tsi, 1);
 		// Graph that
 		//Plotter plotter = new Plotter("TIME", "mystack.pdf", "My stacked plot", "Time", "Power").setPullHard(false);

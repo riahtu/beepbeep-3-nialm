@@ -22,7 +22,7 @@ import java.io.File;
 import ca.uqac.lif.cep.Combiner;
 import ca.uqac.lif.cep.Connector;
 import ca.uqac.lif.cep.GroupProcessor;
-import ca.uqac.lif.cep.epl.CountDecimate;
+import ca.uqac.lif.cep.tmf.CountDecimate;
 import ca.uqac.lif.cep.gnuplot.GnuplotProcessor;
 import ca.uqac.lif.cep.gnuplot.GnuplotScatterplot;
 import ca.uqac.lif.cep.io.Caller;

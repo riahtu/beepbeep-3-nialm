@@ -4,10 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Queue;
-
 import ca.uqac.lif.cep.SingleProcessor;
-import ca.uqac.lif.cep.eml.tuples.NamedTuple;
-import ca.uqac.lif.cep.eml.tuples.NamedTupleMap;
+import ca.uqac.lif.cep.tuples.Tuple;
+import ca.uqac.lif.cep.tuples.TupleMap;
 import electric.ElectricMooreMachine.ApplianceEvent;
 
 public class SignalReconstructor extends SingleProcessor
@@ -47,10 +46,10 @@ public class SignalReconstructor extends SingleProcessor
 	}
 
 	@Override
-	protected Queue<Object[]> compute(Object[] inputs)
+	protected boolean compute(Object[] inputs, Queue<Object[]> outputs)
 	{
-		NamedTuple[] out = new NamedTuple[1];
-		NamedTupleMap nt = new NamedTupleMap();
+		Tuple[] out = new Tuple[1];
+		TupleMap nt = new TupleMap();
 		ApplianceEvent event = (ApplianceEvent) inputs[0];
 		String app_name = event.getName();
 		for (int i = 0; i < m_loadNames.size(); i++)
@@ -84,6 +83,23 @@ public class SignalReconstructor extends SingleProcessor
 			}
 		}
 		out[0] = nt;
-		return wrapVector(out);
+		outputs.add(out);
+		return true;
 	}
+
+  @Override
+  public SignalReconstructor duplicate(boolean with_state)
+  {
+    SignalReconstructor rec = new SignalReconstructor();
+    for (int i = 0; i < m_loadNames.size(); i++)
+    {
+      rec.addLoad(m_loadNames.get(i), m_loadValues.get(i));
+    }
+    if (with_state)
+    {
+      rec.m_whatsOn.clear();
+      rec.m_whatsOn.addAll(m_whatsOn);
+    }
+    return rec;
+  }
 }

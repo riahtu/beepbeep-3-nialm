@@ -1,6 +1,6 @@
 /*
     BeepBeep, an event stream processor
-    Copyright (C) 2008-2015 Sylvain Hallé
+    Copyright (C) 2008-2015 Sylvain Hallï¿½
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,28 +26,20 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 
-import ca.uqac.lif.cep.Combiner;
 import ca.uqac.lif.cep.Connector;
-import ca.uqac.lif.cep.Fork;
+import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.GroupProcessor;
 import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.Pullable;
 import ca.uqac.lif.cep.SingleProcessor;
-import ca.uqac.lif.cep.eml.tuples.CombinableExpression;
-import ca.uqac.lif.cep.eml.tuples.Select;
-import ca.uqac.lif.cep.eml.tuples.TupleFeeder;
-import ca.uqac.lif.cep.eml.tuples.TupleGrammar;
-import ca.uqac.lif.cep.epl.CountDecimate;
+import ca.uqac.lif.cep.tuples.TupleFeeder;
+import ca.uqac.lif.cep.tmf.CountDecimate;
 import ca.uqac.lif.cep.gnuplot.GnuplotProcessor;
 import ca.uqac.lif.cep.gnuplot.GnuplotScatterplot;
-import ca.uqac.lif.cep.interpreter.Interpreter;
 import ca.uqac.lif.cep.io.Caller;
-import ca.uqac.lif.cep.io.StreamReader;
-import ca.uqac.lif.cep.sets.BagUnion;
-import ca.uqac.lif.cep.sets.SetGrammar;
+import ca.uqac.lif.cep.io.ReadLines;
 import ca.uqac.lif.cep.signal.PeakFinderLocalMaximum;
 import ca.uqac.lif.cep.signal.PeakFinderTravelRise;
-import ca.uqac.lif.cep.signal.SignalGrammar;
 import ca.uqac.lif.cep.signal.Threshold;
 import ca.uqac.lif.cep.signal.Limiter;
 
@@ -74,7 +66,7 @@ public class Learning
 		String filename = "data/" + appli + num_test + ".csv";
 		// Get the reader from the filename
 		InputStream is = Utilities.getFileInputStream(filename);
-		StreamReader reader = new StreamReader(is);
+		ReadLines reader = new ReadLines(is);
 		// Connect a tuple feeder to the reader
 		TupleFeeder feeder = new TupleFeeder();
 		Connector.connect(reader, feeder);
@@ -91,7 +83,7 @@ public class Learning
 		}
 		// On second branch...
 		PeakProcessor finder = new PeakProcessor(feeder, component, 100);
-		Connector.connect(fork, finder, 1, 0);
+		Connector.connect(fork, 1, finder, 0);
 		// Join the two outputs
 		Select select = new Select(2, "S.TIME", "S.WL1", "S.WL2", "S.WL3", "S.VARL1", "S.VARL2", "S.VARL3", "T.x");
 		select.setProcessor("S", select_1);
@@ -110,7 +102,7 @@ public class Learning
 		String filename = "data/" + appli + num_test + ".csv";
 		// Get the reader from the filename
 		InputStream is = Utilities.getFileInputStream(filename);
-		StreamReader reader = new StreamReader(is);
+		ReadLines reader = new ReadLines(is);
 		// Connect a tuple feeder to the reader
 		TupleFeeder feeder = new TupleFeeder();
 		Connector.connect(reader, feeder);
@@ -127,7 +119,7 @@ public class Learning
 		}
 		// On second branch...
 		PeakProcessor finder = new PeakProcessor(feeder, component, 100);
-		Connector.connect(fork, finder, 1, 0);
+		Connector.connect(fork, 1, finder, 0);
 		// Join the two outputs
 		Select select = new Select(2, "S.TIME", "S.WL1", "S.WL2", "S.WL3", "S.VARL1", "S.VARL2", "S.VARL3", "T.x");
 		select.setProcessor("S", select_1);

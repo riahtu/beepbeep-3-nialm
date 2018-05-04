@@ -1,23 +1,19 @@
 package electric;
 
-import java.util.Stack;
-
-import ca.uqac.lif.cep.Connector;
-import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.gnuplot.GnuplotScatterplot;
-import ca.uqac.lif.cep.sets.EmlBag;
+import ca.uqac.lif.cep.gnuplot.Multiset;
 
 public class GnuplotStackedPlot extends GnuplotScatterplot
 {
 	@Override
-	protected StringBuilder generatePlot(EmlBag bag)
+	protected String generatePlot(Multiset bag)
 	{
 		StringBuilder out = new StringBuilder();
 		StringBuilder plot_data = generatePlotData(bag);
 		out.append("set terminal ").append(m_terminal).append("\n");
 		out.append("set title \"").append(m_title).append("\"\n");
-		out.append("set xlabel \"").append(m_xTitle).append("\"\n");
-		out.append("set ylabel \"").append(m_yTitle).append("\"\n");
+		out.append("set xlabel \"").append(m_labelX).append("\"\n");
+		out.append("set ylabel \"").append(m_labelY).append("\"\n");
 		out.append("set datafile separator \",\"\n");
 		out.append("plot ");
 		for (int i = 0; i < m_otherHeaders.length; i++)
@@ -40,21 +36,6 @@ public class GnuplotStackedPlot extends GnuplotScatterplot
 		{
 			out.append(plot_data).append("\ne\n");
 		}
-		return out;
-	}
-	
-	public static void build(Stack<Object> stack) 
-	{
-		stack.pop(); // )
-		Processor p = (Processor) stack.pop();
-		stack.pop(); // (
-		stack.pop(); // OF
-		stack.pop(); // PLOT
-		stack.pop(); // STACKED
-		stack.pop(); // GNUPLOT
-		stack.pop(); // THE
-		GnuplotScatterplot gps = new GnuplotScatterplot();
-		Connector.connect(p, gps);
-		stack.push(gps);
+		return out.toString();
 	}
 }

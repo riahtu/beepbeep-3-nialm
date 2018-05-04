@@ -8,6 +8,8 @@ import java.io.InputStream;
 import ca.uqac.lif.cep.Connector;
 import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.Pullable;
+import ca.uqac.lif.cep.functions.ApplyFunction;
+import ca.uqac.lif.cep.tuples.FetchAttribute;
 import ca.uqac.lif.cep.tuples.TupleFeeder;
 import ca.uqac.lif.cep.io.ReadLines;
 import ca.uqac.lif.cep.signal.PeakFinderLocalMaximum;
@@ -27,9 +29,7 @@ public class PeakTest
 		PeakFinderLocalMaximum finder;
 		{
 			// Keep a single attribute
-			String[] attributes = {"S.WL1"};
-			Select select = new Select(1, attributes);
-			select.setProcessor("S", feeder);
+			ApplyFunction select = new ApplyFunction(new FetchAttribute("WL1"));
 			Connector.connect(feeder, select);
 			// Pass through peak detector
 			finder = new PeakFinderLocalMaximum(15);
