@@ -32,22 +32,24 @@ import ca.uqac.lif.cep.GroupProcessor;
 import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.Pullable;
 import ca.uqac.lif.cep.SingleProcessor;
+import ca.uqac.lif.cep.functions.ApplyFunction;
+import ca.uqac.lif.cep.tuples.ScalarIntoTuple;
+import ca.uqac.lif.cep.tuples.Select;
 import ca.uqac.lif.cep.tuples.TupleFeeder;
 import ca.uqac.lif.cep.tmf.CountDecimate;
 import ca.uqac.lif.cep.gnuplot.GnuplotProcessor;
 import ca.uqac.lif.cep.gnuplot.GnuplotScatterplot;
-import ca.uqac.lif.cep.io.Caller;
 import ca.uqac.lif.cep.io.ReadLines;
 import ca.uqac.lif.cep.signal.PeakFinderLocalMaximum;
 import ca.uqac.lif.cep.signal.PeakFinderTravelRise;
 import ca.uqac.lif.cep.signal.Threshold;
 import ca.uqac.lif.cep.signal.Limiter;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({ "unused", "deprecation" })
 public class Learning
 {
 
-	public static void main(String[] args)
+	public static void main(String[] args) throws FileNotFoundException
 	{
 		String[] tools = {"test"};
 		for (String tool : tools)
@@ -61,7 +63,7 @@ public class Learning
 		
 	}
 	
-	static void detectPeakOnAppliance(String appli, String component, int num_test, boolean to_plot)
+	static void detectPeakOnAppliance(String appli, String component, int num_test, boolean to_plot) throws FileNotFoundException
 	{
 		String filename = "data/" + appli + num_test + ".csv";
 		// Get the reader from the filename
@@ -74,30 +76,29 @@ public class Learning
 		Fork fork = new Fork(2);
 		Connector.connect(feeder, fork);
 		// On first branch...
-		Select select_1;
+		Project select_1;
 		{
 			// Filter a few columns from the tuples
-			select_1 = new Select(1, "TIME", "WL1", "WL2", "WL3", "VARL1", "VARL2", "VARL3");
-			select_1.setProcessor("", feeder);
-			Connector.connect(fork, select_1, 0, 0);
+			select_1 = new Project(new String[]{"T"}, new String[]{"TIME", "WL1", "WL2", "WL3", "VARL1", "VARL2", "VARL3"});
+			Connector.connect(fork, 0, select_1, 0);
 		}
 		// On second branch...
 		PeakProcessor finder = new PeakProcessor(feeder, component, 100);
 		Connector.connect(fork, 1, finder, 0);
+		ApplyFunction sit = new ApplyFunction(new ScalarIntoTuple("x"));
+		Connector.connect(finder, sit);
 		// Join the two outputs
-		Select select = new Select(2, "S.TIME", "S.WL1", "S.WL2", "S.WL3", "S.VARL1", "S.VARL2", "S.VARL3", "T.x");
-		select.setProcessor("S", select_1);
-		select.setProcessor("T", finder);
-		Connector.connect(select_1, select, 0, 0);
-		Connector.connect(finder, select, 0, 1);
+		Project select = new Project(new String[]{"S", "T"}, new String[]{"S.TIME", "S.WL1", "S.WL2", "S.WL3", "S.VARL1", "S.VARL2", "S.VARL3", "T.x"});
+		Connector.connect(select_1, 0, select, 0);
+		Connector.connect(sit, 0, select, 1);
 		// Plug into a plotter
-		Plotter plotter = new Plotter("S.TIME", "data/" + appli + num_test + ".pdf", "Raw signal", "Time(s)", "Power (W)");
+		Plotter plotter = new Plotter("TIME", "data/" + appli + num_test + ".pdf", "Raw signal", "Time(s)", "Power (W)");
 		Connector.connect(select, plotter);
 		plotter.plot(4);
 		plotter.close();
 	}
 	
-	static void detectPlateauOnAppliance(String appli, String component, int num_test, boolean to_plot)
+	static void detectPlateauOnAppliance(String appli, String component, int num_test, boolean to_plot) throws FileNotFoundException
 	{
 		String filename = "data/" + appli + num_test + ".csv";
 		// Get the reader from the filename
@@ -110,22 +111,21 @@ public class Learning
 		Fork fork = new Fork(2);
 		Connector.connect(feeder, fork);
 		// On first branch...
-		Select select_1;
+		Project select_1;
 		{
 			// Filter a few columns from the tuples
-			select_1 = new Select(1, "TIME", "WL1", "WL2", "WL3", "VARL1", "VARL2", "VARL3");
-			select_1.setProcessor("", feeder);
-			Connector.connect(fork, select_1, 0, 0);
+			select_1 = new Project(new String[] {""}, new String[] {"TIME", "WL1", "WL2", "WL3", "VARL1", "VARL2", "VARL3"});
+			Connector.connect(fork, 0, select_1, 0);
 		}
 		// On second branch...
 		PeakProcessor finder = new PeakProcessor(feeder, component, 100);
 		Connector.connect(fork, 1, finder, 0);
+		ApplyFunction sit = new ApplyFunction(new ScalarIntoTuple("x"));
+		Connector.connect(finder, sit);
 		// Join the two outputs
-		Select select = new Select(2, "S.TIME", "S.WL1", "S.WL2", "S.WL3", "S.VARL1", "S.VARL2", "S.VARL3", "T.x");
-		select.setProcessor("S", select_1);
-		select.setProcessor("T", finder);
-		Connector.connect(select_1, select, 0, 0);
-		Connector.connect(finder, select, 0, 1);
+		Project select = new Project(new String[] {"S", "T"}, new String[] {"S.TIME", "S.WL1", "S.WL2", "S.WL3", "S.VARL1", "S.VARL2", "S.VARL3", "T.x"});
+		Connector.connect(select_1, 0, select, 0);
+		Connector.connect(sit, 0, select, 1);
 		// Plug into a plotter
 		Plotter plotter = new Plotter("S.TIME", "data/" + appli + num_test + "-plateau.pdf", "Raw signal", "Time(s)", "Power (W)");
 		Connector.connect(select, plotter);

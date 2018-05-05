@@ -1,5 +1,6 @@
 package electric;
 
+import java.io.FileNotFoundException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,11 +17,11 @@ import ca.uqac.lif.cep.tmf.Trim;
 public class CompoundTest
 {
 
-	public static void main(String[] args)
+	public static void main(String[] args) throws FileNotFoundException
 	{
 		// Create set of fake appliances
 		String[] components = {"WL1"};
-		String[] letters = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O"};
+		//String[] letters = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O"};
 		float time_step = 1/60f;
 		Set<FakeAppliance> appliances = new HashSet<FakeAppliance>();
 		appliances.add(new FakeAppliance("Kettle", 500, 500, 2, 4, time_step));
@@ -52,12 +53,10 @@ public class CompoundTest
 			//signal[components.length + i] = pp;
 		}
 		// Merge all the outputs in a single event
-		int symb_count = 0;
     ApplyFunction select = new ApplyFunction(new MergeScalars("PK-WL1", /*"PK-WL2", "PK-WL3", 
         "PK-VARL1", "PK-VARL2", "PK-VARL3",*/
         "PT-WL1", /*"PT-WL2", "PT-WL3",
         "PT-VARL1", "PT-VARL2", "PT-VARL3",*/ "TIME"));
-		symb_count = 0;
 		for (int i = 0; i < 2 * components.length; i++)
 		{
 			Connector.connect(signal[i], 0, select, i);

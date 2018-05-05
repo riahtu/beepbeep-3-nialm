@@ -17,6 +17,7 @@
  */
 package electric;
 
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 import ca.uqac.lif.cep.Connector;
@@ -32,8 +33,7 @@ import electric.ElectricMooreMachine.ApplianceEvent;
 
 public class Recognition
 {
-
-	public static void main(String[] args)
+	public static void main(String[] args) throws FileNotFoundException
 	{
 		String[] components = {"WL1", "WL2", "WL3", "VARL1", "VARL2", "VARL3"};
 		//String[] components = {"WL1"};
@@ -81,12 +81,12 @@ public class Recognition
 		}
 		Connector.connect(fork1, 2 * components.length, select, 2 * components.length);
 		// Plug that into a plotter
-		/*
+		
 		Plotter plotter = new Plotter("TIME", "data/test" + num_test + ".pdf", 
 				"Output of peak detector on all signal components", "Time (s)", "Power (W)");
 		Connector.connect(select, plotter);
 		plotter.plot(9);
-		System.exit(0);*/
+		System.exit(0);
 		// Fork the output again for as many appliances we have
 		Processor[] machines = new Processor[5];
 		Fork fork2 = new Fork(machines.length);

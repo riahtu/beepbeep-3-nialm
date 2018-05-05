@@ -1,5 +1,6 @@
 package electric;
 
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 import ca.uqac.lif.cep.Connector;
@@ -9,7 +10,7 @@ import ca.uqac.lif.cep.io.ReadLines;
 public class PlotThatThing
 {
 
-	public static void main(String[] args)
+	public static void main(String[] args) throws FileNotFoundException
 	{
 		String filename = "data/testB.csv";
 		

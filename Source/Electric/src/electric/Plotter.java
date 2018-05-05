@@ -1,6 +1,6 @@
 /*
     BeepBeep, an event stream processor
-    Copyright (C) 2008-2015 Sylvain Hall�
+    Copyright (C) 2008-2018 Sylvain Hallé
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,69 +18,76 @@
 package electric;
 
 import java.io.File;
-
-import ca.uqac.lif.cep.Combiner;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import ca.uqac.lif.cep.Connector;
 import ca.uqac.lif.cep.GroupProcessor;
+import ca.uqac.lif.cep.functions.ApplyFunction;
 import ca.uqac.lif.cep.tmf.CountDecimate;
-import ca.uqac.lif.cep.gnuplot.GnuplotProcessor;
+import ca.uqac.lif.cep.gnuplot.GnuplotCaller;
 import ca.uqac.lif.cep.gnuplot.GnuplotScatterplot;
-import ca.uqac.lif.cep.io.Caller;
-import ca.uqac.lif.cep.io.FileWriter;
-import ca.uqac.lif.cep.sets.BagUnion;
+import ca.uqac.lif.cep.gnuplot.Multiset;
+import ca.uqac.lif.cep.gnuplot.PlotFunction;
+import ca.uqac.lif.cep.io.Print;
 
+@SuppressWarnings("deprecation")
 public class Plotter extends GroupProcessor
 {
 	public static final int s_decimateInterval = 200;
 	
-	public static final GnuplotProcessor.Terminal s_terminal = GnuplotProcessor.Terminal.PDF;
+	public static final PlotFunction.Terminal s_terminal = PlotFunction.Terminal.PDF;
 	
-	public static final String s_gnuplotCommand = "gnuplot";
-	
-	private final FileWriter m_writer;
+	private final Print m_writer;
 	
 	private boolean m_pullHard = true;
 	
-	public Plotter(GnuplotStackedPlot plot, String x_axis, String filename, String title, String x_title, String y_title)
+	public Plotter(GnuplotStackedPlot plot, String x_axis, String filename, String title, String x_title, String y_title) throws FileNotFoundException
 	{
 		super(1, 0);
-		Combiner union = new Combiner(new BagUnion());
+		Multiset.PutInto union = new Multiset.PutInto();
 		// Decimate the results (keep one every 200)
 		CountDecimate decimate = new CountDecimate(s_decimateInterval);
 		Connector.connect(union, decimate);
 		// Connect a Gnuplot to the decimated results
-		plot.setX(x_axis).setRaw(true).setTerminal(s_terminal).setTitle(title);
-		plot.setXTitle(x_title).setYTitle(y_title);
-		Connector.connect(decimate, plot);
+		plot.setX(x_axis);
+		plot.setTerminal(s_terminal);
+		plot.setTitle(title);
+		plot.setLabelX(x_title).setLabelY(y_title);
+		ApplyFunction g_plot = new ApplyFunction(plot);
+		Connector.connect(decimate, g_plot);
 		// Connect a caller to gnuplot on the plot
-		Caller gnuplot = new Caller(s_gnuplotCommand);
-		Connector.connect(plot, gnuplot);
-		m_writer = new FileWriter(new File(filename), false);
+		GnuplotCaller gnuplot = new GnuplotCaller();
+		Connector.connect(g_plot, gnuplot);
+		m_writer = new Print(new PrintStream(new File(filename)));
 		Connector.connect(gnuplot, m_writer);
 		// Bundle
-		addProcessors(union, decimate, plot, gnuplot, m_writer);
+		addProcessors(union, decimate, g_plot, gnuplot, m_writer);
 		this.associateInput(0, union, 0);
 	}
 
-	public Plotter(String x_axis, String filename, String title, String x_title, String y_title)
+	public Plotter(String x_axis, String filename, String title, String x_title, String y_title) throws FileNotFoundException
 	{
 		super(1, 0);
-		Combiner union = new Combiner(new BagUnion());
+		
+		Multiset.PutInto union = new Multiset.PutInto();
 		// Decimate the results (keep one every 200)
 		CountDecimate decimate = new CountDecimate(s_decimateInterval);
 		Connector.connect(union, decimate);
 		// Connect a Gnuplot to the decimated results
 		GnuplotScatterplot plot = new GnuplotScatterplot();
-		plot.setX(x_axis).setRaw(true).setTerminal(s_terminal).setTitle(title);
-		plot.setXTitle(x_title).setYTitle(y_title);
-		Connector.connect(decimate, plot);
+		plot.setX(x_axis);
+		plot.setTerminal(s_terminal);
+		plot.setTitle(title);
+		plot.setLabelX(x_title).setLabelY(y_title);
+		ApplyFunction g_plot = new ApplyFunction(plot);
+		Connector.connect(decimate, g_plot);
 		// Connect a caller to gnuplot on the plot
-		Caller gnuplot = new Caller(s_gnuplotCommand);
-		Connector.connect(plot, gnuplot);
-		m_writer = new FileWriter(new File(filename), false);
+		GnuplotCaller gnuplot = new GnuplotCaller();
+		Connector.connect(g_plot, gnuplot);
+		m_writer = new Print(new PrintStream(new File(filename)));
 		Connector.connect(gnuplot, m_writer);
 		// Bundle
-		addProcessors(union, decimate, plot, gnuplot, m_writer);
+		addProcessors(union, decimate, g_plot, gnuplot, m_writer);
 		this.associateInput(0, union, 0);
 	}
 	

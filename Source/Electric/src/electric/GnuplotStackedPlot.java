@@ -3,6 +3,7 @@ package electric;
 import ca.uqac.lif.cep.gnuplot.GnuplotScatterplot;
 import ca.uqac.lif.cep.gnuplot.Multiset;
 
+@SuppressWarnings("deprecation")
 public class GnuplotStackedPlot extends GnuplotScatterplot
 {
 	@Override
