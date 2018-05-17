@@ -17,9 +17,7 @@
  */
 package electric;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.PrintStream;
 import ca.uqac.lif.cep.Connector;
 import ca.uqac.lif.cep.GroupProcessor;
 import ca.uqac.lif.cep.functions.ApplyFunction;
@@ -28,16 +26,15 @@ import ca.uqac.lif.cep.gnuplot.GnuplotCaller;
 import ca.uqac.lif.cep.gnuplot.GnuplotScatterplot;
 import ca.uqac.lif.cep.gnuplot.Multiset;
 import ca.uqac.lif.cep.gnuplot.PlotFunction;
-import ca.uqac.lif.cep.io.Print;
 
 @SuppressWarnings("deprecation")
 public class Plotter extends GroupProcessor
 {
-	public static final int s_decimateInterval = 200;
+	public static final int s_decimateInterval = 50;
 	
 	public static final PlotFunction.Terminal s_terminal = PlotFunction.Terminal.PDF;
 	
-	private final Print m_writer;
+	private final OverwriteFile m_writer;
 	
 	private boolean m_pullHard = true;
 	
@@ -58,7 +55,7 @@ public class Plotter extends GroupProcessor
 		// Connect a caller to gnuplot on the plot
 		GnuplotCaller gnuplot = new GnuplotCaller();
 		Connector.connect(g_plot, gnuplot);
-		m_writer = new Print(new PrintStream(new File(filename)));
+		m_writer = new OverwriteFile(filename);
 		Connector.connect(gnuplot, m_writer);
 		// Bundle
 		addProcessors(union, decimate, g_plot, gnuplot, m_writer);
@@ -70,6 +67,7 @@ public class Plotter extends GroupProcessor
 		super(1, 0);
 		
 		Multiset.PutInto union = new Multiset.PutInto();
+		associateInput(0, union, 0);
 		// Decimate the results (keep one every 200)
 		CountDecimate decimate = new CountDecimate(s_decimateInterval);
 		Connector.connect(union, decimate);
@@ -81,14 +79,13 @@ public class Plotter extends GroupProcessor
 		plot.setLabelX(x_title).setLabelY(y_title);
 		ApplyFunction g_plot = new ApplyFunction(plot);
 		Connector.connect(decimate, g_plot);
-		// Connect a caller to gnuplot on the plot
+		// Connect a caller to gnuplot on the plot		
 		GnuplotCaller gnuplot = new GnuplotCaller();
 		Connector.connect(g_plot, gnuplot);
-		m_writer = new Print(new PrintStream(new File(filename)));
+		m_writer = new OverwriteFile(filename);
 		Connector.connect(gnuplot, m_writer);
 		// Bundle
 		addProcessors(union, decimate, g_plot, gnuplot, m_writer);
-		this.associateInput(0, union, 0);
 	}
 	
 	public Plotter setPullHard(boolean b)
@@ -99,10 +96,7 @@ public class Plotter extends GroupProcessor
 	
 	public Plotter close()
 	{
-		if (m_writer != null)
-		{
-			m_writer.close();
-		}
+		// This method no longer does anything
 		return this;
 	}
 	
