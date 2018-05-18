@@ -37,7 +37,7 @@ public class CompoundTest
 		Processor[] signal = new Processor[2 * components.length];
 		for (int i = 0; i < components.length; i++)
 		{
-			signal[i] = new PeakProcessor(null, components[i], 90); 
+			signal[i] = new PeakProcessor(components[i], 90); 
 			Connector.connect(fork1, i, signal[i], 0);
 		}
 		for (int i = 0; i < components.length; i++)

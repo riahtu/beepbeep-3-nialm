@@ -83,7 +83,7 @@ public class Learning
 			Connector.connect(fork, 0, select_1, 0);
 		}
 		// On second branch...
-		PeakProcessor finder = new PeakProcessor(feeder, component, 100);
+		PeakProcessor finder = new PeakProcessor(component, 100);
 		Connector.connect(fork, 1, finder, 0);
 		ApplyFunction sit = new ApplyFunction(new ScalarIntoTuple("x"));
 		Connector.connect(finder, sit);
@@ -118,7 +118,7 @@ public class Learning
 			Connector.connect(fork, 0, select_1, 0);
 		}
 		// On second branch...
-		PeakProcessor finder = new PeakProcessor(feeder, component, 100);
+		PeakProcessor finder = new PeakProcessor(component, 100);
 		Connector.connect(fork, 1, finder, 0);
 		ApplyFunction sit = new ApplyFunction(new ScalarIntoTuple("x"));
 		Connector.connect(finder, sit);

@@ -30,11 +30,10 @@ class PeakProcessor extends GroupProcessor
 {
 	/**
 	 * Instantiates a signal processor
-	 * @param input The input for the signal processor
 	 * @param component The electrical component to monitor
 	 * @param threshold The threshold
 	 */
-	public PeakProcessor(Processor input, String component, int threshold)
+	public PeakProcessor(String component, int threshold)
 	{
 		super(1, 1);
 		// Keep a single attribute

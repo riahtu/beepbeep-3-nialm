@@ -56,7 +56,7 @@ public class RecognitionPeak
     Connector.connect(feeder, fork1);
     // Send each fork to a different signal processor
     Processor[] signal = new Processor[2];
-    signal[0] = new PeakProcessor(null, "WL1", 150); 
+    signal[0] = new PeakProcessor("WL1", 150); 
     Connector.connect(fork1, 0, signal[0], 0);
     PlateauProcessor pp = new PlateauProcessor(null, "WL1", 150);
     Connector.connect(fork1, 1, pp, 0);
