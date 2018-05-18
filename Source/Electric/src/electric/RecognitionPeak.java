@@ -76,7 +76,7 @@ public class RecognitionPeak
     if (PLOT)
     {
       // Plug that into a plotter
-      Plotter plotter = new Plotter("TIME", "data/test" + num_test + ".pdf", 
+      Plotter plotter = new Plotter("TIME", "data/test_plot" + num_test + ".pdf", 
           "Output of peak detector on all signal components", "Time (s)", "Power (W)");
       Connector.connect(select, plotter);
       plotter.plot(4);
