@@ -29,30 +29,32 @@ jacoco.exec
 # ----------------------------------------------------
 
 # Eclipse-specific
-Source/.metadata/
-Source/**/*.pydevproject
-Source/**/.project
-Source/**/.metadata
-Source/**/*.class
-Source/**/bin
-Source/**/tmp
-Source/**/*~.nib
-Source/**/local.properties
-Source/**/.classpath
-Source/**/.settings/
-Source/**/.recommenders/
-Source/**/.loadpath
+Source/Electric/.metadata/
+Source/Electric/**/*.pydevproject
+Source/Electric/**/.project
+Source/Electric/**/.metadata
+Source/Electric/**/*.class
+Source/Electric/**/bin
+Source/Electric/**/tmp
+Source/Electric/**/lib
+Source/Electric/**/dep
+Source/Electric/**/*~.nib
+Source/Electric/**/local.properties
+Source/Electric/**/.classpath
+Source/Electric/**/.settings/
+Source/Electric/**/.recommenders/
+Source/Electric/**/.loadpath
 
 # External tool builders
-Source/**/.externalToolBuilders/
+Source/Electric/**/.externalToolBuilders/
 
 # Locally stored "Eclipse launch configurations"
-Source/**/*.launch
+Source/Electric/**/*.launch
 
 # CDT-specific
-Source/**/.cproject
+Source/Electric/**/.cproject
 
 # PDT-specific
-Source/**/.buildpath
+Source/Electric/**/.buildpath
 
-Source/Electric/data/**/*.pdf
+Source/Electric/Source/Electric/data/**/*.pdf
