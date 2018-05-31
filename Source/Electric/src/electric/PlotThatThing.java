@@ -32,7 +32,7 @@ public class PlotThatThing
 		String filename = "data/testB.csv";
 		
 		
-		InputStream is = Utilities.getFileInputStream(filename);
+		InputStream is = ElectricMooreMachine.class.getResourceAsStream(filename);
 		ReadLines reader = new ReadLines(is);
 		// Connect a tuple feeder to the reader
 		TupleFeeder feeder = new TupleFeeder();

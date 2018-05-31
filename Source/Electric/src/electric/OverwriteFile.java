@@ -39,6 +39,10 @@ public class OverwriteFile extends Sink
   {
     FileOutputStream fos = null;
     ProcessorException ex = null;
+    if (m_filename.isEmpty())
+    {
+      return true;
+    }
     try
     {
       fos = new FileOutputStream(m_filename);

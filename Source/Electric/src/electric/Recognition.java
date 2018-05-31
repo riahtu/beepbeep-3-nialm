@@ -41,7 +41,7 @@ public class Recognition
 		int num_test = 1;
 		String filename = "data/test" + num_test + ".csv";
 		// Get the reader from the filename
-		InputStream is = Utilities.getFileInputStream(filename);
+		InputStream is = ElectricMooreMachine.class.getResourceAsStream(filename);
 		ReadLines reader = new ReadLines(is);
 		// Connect a tuple feeder to the reader
 		TupleFeeder feeder = new TupleFeeder();
@@ -82,7 +82,7 @@ public class Recognition
 		Connector.connect(fork1, 2 * components.length, select, 2 * components.length);
 		// Plug that into a plotter
 		
-		Plotter plotter = new Plotter("TIME", "data/test" + num_test + ".pdf", 
+		Plotter plotter = new Plotter("TIME", "test" + num_test + ".pdf", 
 				"Output of peak detector on all signal components", "Time (s)", "Power (W)");
 		Connector.connect(select, plotter);
 		plotter.plot(9);

@@ -68,7 +68,7 @@ public class Learning
 	{
 		String filename = "data/" + appli + num_test + ".csv";
 		// Get the reader from the filename
-		InputStream is = Utilities.getFileInputStream(filename);
+		InputStream is = ElectricMooreMachine.class.getResourceAsStream(filename);
 		ReadLines reader = new ReadLines(is);
 		// Connect a tuple feeder to the reader
 		TupleFeeder feeder = new TupleFeeder();
@@ -93,7 +93,7 @@ public class Learning
 		Connector.connect(select_1, 0, select, 0);
 		Connector.connect(sit, 0, select, 1);
 		// Plug into a plotter
-		Plotter plotter = new Plotter("TIME", "data/" + appli + num_test + ".pdf", "Raw signal", "Time(s)", "Power (W)");
+		Plotter plotter = new Plotter("TIME", appli + num_test + ".pdf", "Raw signal", "Time(s)", "Power (W)");
 		Connector.connect(select, plotter);
 		plotter.plot(4);
 		plotter.close();
@@ -103,7 +103,7 @@ public class Learning
 	{
 		String filename = "data/" + appli + num_test + ".csv";
 		// Get the reader from the filename
-		InputStream is = Utilities.getFileInputStream(filename);
+		InputStream is = ElectricMooreMachine.class.getResourceAsStream(filename);
 		ReadLines reader = new ReadLines(is);
 		// Connect a tuple feeder to the reader
 		TupleFeeder feeder = new TupleFeeder();
@@ -128,7 +128,7 @@ public class Learning
 		Connector.connect(select_1, 0, select, 0);
 		Connector.connect(sit, 0, select, 1);
 		// Plug into a plotter
-		Plotter plotter = new Plotter("S.TIME", "data/" + appli + num_test + "-plateau.pdf", "Raw signal", "Time(s)", "Power (W)");
+		Plotter plotter = new Plotter("S.TIME", appli + num_test + "-plateau.pdf", "Raw signal", "Time(s)", "Power (W)");
 		Connector.connect(select, plotter);
 		plotter.plot(4);
 		plotter.close();
