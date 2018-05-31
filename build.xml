@@ -279,7 +279,7 @@
         <formatter type="xml"/>
         <batchtest fork="yes" todir="${test.reportdir}">
           <fileset dir="${build.test.srcdir}">
-            <include name="**/*.java"/>
+            <include name="**/*Test.java"/>
           </fileset>
         </batchtest>
       </junit>

@@ -31,7 +31,7 @@ import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.Multiplex;
 import ca.uqac.lif.cep.tmf.Trim;
 
-public class CompoundTest
+public class CompoundDemo
 {
 
 	public static void main(String[] args) throws FileNotFoundException

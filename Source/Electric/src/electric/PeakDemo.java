@@ -32,7 +32,7 @@ import ca.uqac.lif.cep.io.ReadLines;
 import ca.uqac.lif.cep.signal.PeakFinderLocalMaximum;
 
 @SuppressWarnings("unused")
-public class PeakTest
+public class PeakDemo
 {
 	public static void main(String[] args)
 	{

@@ -45,6 +45,12 @@
   <!-- Redefine directories -->
   <srcdir>Source/Electric/src</srcdir>
   <bindir>Source/Electric/bin</bindir>
+  <depdir>Source/Electric/dep</depdir>
+  <libdir>Source/Electric/lib</libdir>
+  <test>
+    <srcdir>Source/Electric/src</srcdir>
+    <bindir>Source/Electric/bin</bindir>
+  </test>
   
   <!--
     Write JAR dependencies here.
