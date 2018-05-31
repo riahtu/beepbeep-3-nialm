@@ -13,4 +13,4 @@ addons:
 script:
   - sudo ant install-deps
   - ant test
-  - sonar-scanner
+  #- sonar-scanner
