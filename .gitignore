@@ -54,3 +54,5 @@ Source/**/.cproject
 
 # PDT-specific
 Source/**/.buildpath
+
+Source/Electric/data/**/*.pdf

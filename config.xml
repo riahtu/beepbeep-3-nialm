@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  Configuration file for AntRun.
+  
+  Use this file to override the default properties contained
+  in build.xml. For example, to override the build.jar.filename
+  property (which sets the name of the compiled jar file), add
+  an element
+  
+  <jar>
+    <filename>foo</filename>
+  </jar>
+  
+  inside the <build> element.
+  
+  **Caveat emptor:** in some cases, changing this file and running ant
+  again will result in Ant using a cached version of the old file! Run
+  "ant dummy" to make sure that the correct data is being read. Otherwise
+  you might need to run "ant clean" and start over.
+-->
+<build>
+  <!-- Uncomment any of these if you want to override the build
+       script's default values -->
+
+  <!-- The project's name -->
+  <name>BeepBeep NIALM Palette</name>
+  
+  <!-- The project's version number -->
+  <version>1.0</version>
+  
+  <!-- The project's author. Currently this only
+  shows up in the footer of the Javadoc documentation. -->
+  <author>Nicolas Taffoureau</author>
+  
+  <!-- The project's main class -->
+  <mainclass>electric.ElectricMooreMachine</mainclass>
+  
+  <!-- Output jar -->
+  <jar>
+    <filename>nialm.jar</filename>
+    <withdoc>true</withdoc>
+    <withsrc>false</withsrc>
+  </jar>
+  
+  <!-- Redefine directories -->
+  <srcdir>Source/Electric/src</srcdir>
+  <bindir>Source/Electric/bin</bindir>
+  
+  <!--
+    Write JAR dependencies here.
+  -->
+  <dependencies>
+    <dependency>
+      <!--
+      BeepBeep
+      -->
+      <name>BeepBeep 3 Core</name>             
+      <classname>ca.uqac.lif.cep.Processor</classname>
+      <files>
+        <zip>https://github.com/liflab/beepbeep-3/releases/download/v0.8.1-alpha/beepbeep-3-0.8.1-alpha.zip</zip>
+      </files>
+      <bundle>false</bundle>
+    </dependency>
+    <dependency>
+    <!--
+      BeepBeep palettes
+      -->
+      <name>BeepBeep 3 Palettes Bundle</name>
+      <classname>ca.uqac.lif.cep.fsm.MooreMachine</classname>
+      <files>
+        <zip>https://github.com/liflab/beepbeep-3-palettes/releases/download/20180531/beepbeep-3-palettes-v20180531.zip</zip>
+      </files>
+      <bundle>false</bundle>
+    </dependency>
+  </dependencies>
+</build>
