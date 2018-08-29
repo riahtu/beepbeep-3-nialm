@@ -21,7 +21,6 @@ import java.util.Iterator;
 import java.util.Queue;
 import java.util.concurrent.Future;
 
-import ca.uqac.lif.cep.NextStatus;
 import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.Pullable;
 import ca.uqac.lif.cep.Pushable;

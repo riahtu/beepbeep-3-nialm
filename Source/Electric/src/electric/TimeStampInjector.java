@@ -19,10 +19,10 @@ package electric;
 
 import java.util.Queue;
 import ca.uqac.lif.cep.Processor;
-import ca.uqac.lif.cep.SingleProcessor;
+import ca.uqac.lif.cep.SynchronousProcessor;
 import ca.uqac.lif.cep.tuples.TupleMap;
 
-public class TimeStampInjector extends SingleProcessor
+public class TimeStampInjector extends SynchronousProcessor
 {
 	public TimeStampInjector()
 	{
