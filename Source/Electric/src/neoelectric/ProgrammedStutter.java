@@ -9,20 +9,19 @@ public class ProgrammedStutter extends SynchronousProcessor
 
   public ProgrammedStutter()
   {
-    super(1, 1);
+    super(2, 1);
   }
   
   @Override
   protected boolean compute(Object[] inputs, Queue<Object[]> outputs)
   {
-    Object[] v = (Object[]) inputs[0];
-    float x = ((Number) v[0]).floatValue();
-    int n = ((Number) v[1]).intValue();
+    float x = ((Number) inputs[0]).floatValue();
+    int n = ((Number) inputs[1]).intValue();
     for (int i = 0; i < n; i++)
     {
       outputs.add(new Object[] {x});
     }
-    return false;
+    return true;
   }
 
   @Override
