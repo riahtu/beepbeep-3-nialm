@@ -35,13 +35,16 @@ public class ProcessEnvelope extends GroupProcessor
     // Second branch: plateau detection
     Processor plateau_finder = new PlateauFinder().setPlateauRange(RANGE).setRelative(true);
     Connector.connect(f, 1, plateau_finder, 0);
+    // Threshold to avoid finding plateaus due to noise
+    Threshold plateau_th = new Threshold(THRESHOLD);
+    Connector.connect(plateau_finder, plateau_th);
     Processor plateau_damper = new Limiter(10);
-    Connector.connect(plateau_finder, plateau_damper);
+    Connector.connect(plateau_th, plateau_damper);
     Persist plateau_persist = new Persist(4);
     Connector.connect(plateau_damper, plateau_persist);
     
     // Bundle everything into a group
-    addProcessors(f, peak_finder, peak_th, peak_damper, peak_persist, plateau_finder, plateau_damper, plateau_persist);
+    addProcessors(f, peak_finder, peak_th, peak_damper, peak_persist, plateau_finder, plateau_th, plateau_damper, plateau_persist);
     associateInput(0, f, 0);
     associateOutput(0, peak_persist, 0);
     associateOutput(1, plateau_persist, 0);

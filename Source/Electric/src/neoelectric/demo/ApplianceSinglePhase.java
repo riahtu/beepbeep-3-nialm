@@ -1,11 +1,15 @@
 package neoelectric.demo;
 
 import ca.uqac.lif.cep.Connector;
+import ca.uqac.lif.cep.functions.Cumulate;
+import ca.uqac.lif.cep.functions.CumulativeFunction;
+import ca.uqac.lif.cep.functions.TurnInto;
 import ca.uqac.lif.cep.mtnp.DrawPlot;
 import ca.uqac.lif.cep.mtnp.UpdateTableStream;
 import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Pump;
+import ca.uqac.lif.cep.util.Numbers;
 import ca.uqac.lif.cep.widgets.WidgetSink;
 import ca.uqac.lif.mtnp.plot.Plot.ImageType;
 import ca.uqac.lif.mtnp.plot.gnuplot.Scatterplot;
@@ -25,13 +29,17 @@ public class ApplianceSinglePhase
 	{
 		InputStream is = ApplianceSinglePhase.class.getResourceAsStream("data/test-stutter.csv");
 		SimulateAppliance sm = new SimulateAppliance(is, 60f);
+		Fork f1 = new Fork(3);
+		Connector.connect(sm, f1);
+		TurnInto one = new TurnInto(1);
+		Connector.connect(f1, 0, one, 0);
+		Cumulate sum_one = new Cumulate(new CumulativeFunction<Number>(Numbers.addition));
+		Connector.connect(one, sum_one);
 		UpdateTableStream uts = new UpdateTableStream("Time", "W", "Peak", "Plateau");
-		Connector.connect(sm, 0, uts, 0);
-		Fork fork = new Fork(2);
-		Connector.connect(sm, 1, fork, 0);
-		Connector.connect(fork, 0, uts, 1);
+		Connector.connect(sum_one, 0, uts, 0);
+		Connector.connect(f1, 1, uts, 1);
 		ProcessEnvelope ed = new ProcessEnvelope();
-		Connector.connect(fork, 1, ed, 0);
+		Connector.connect(f1, 2, ed, 0);
     Connector.connect(ed, 0, uts, 2);
     Connector.connect(ed, 1, uts, 3);
 		KeepLast last = new KeepLast(1);

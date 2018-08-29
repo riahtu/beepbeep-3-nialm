@@ -3,9 +3,7 @@ package neoelectric;
 import ca.uqac.lif.cep.Connector;
 import ca.uqac.lif.cep.GroupProcessor;
 import ca.uqac.lif.cep.functions.ApplyFunction;
-import ca.uqac.lif.cep.tuples.FixedTupleBuilder;
 import ca.uqac.lif.cep.tuples.MergeScalars;
-import ca.uqac.lif.cep.tuples.TupleFeeder;
 
 public class ProcessAllEnvelopes extends GroupProcessor
 {
@@ -23,8 +21,8 @@ public class ProcessAllEnvelopes extends GroupProcessor
     String[] comp_names = new String[names.length * 2];
     for (int i = 0; i < names.length; i++)
     {
-      comp_names[2 * i] = names[i] + "K";
-      comp_names[2 * i + 1] = names[i] + "T";
+      comp_names[2 * i] = names[i] + "-K";
+      comp_names[2 * i + 1] = names[i] + "-T";
     }
     ApplyFunction tf = new ApplyFunction(new MergeScalars(comp_names));
     for (int i = 0; i < comp_names.length; i++)
