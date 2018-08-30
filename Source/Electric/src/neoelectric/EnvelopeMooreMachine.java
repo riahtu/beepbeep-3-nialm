@@ -17,7 +17,9 @@
  */
 package neoelectric;
 
+import ca.uqac.lif.cep.util.Booleans;
 import ca.uqac.lif.cep.util.Numbers;
+import java.util.Set;
 import ca.uqac.lif.cep.fsm.FunctionTransition;
 import ca.uqac.lif.cep.fsm.MooreMachine;
 import ca.uqac.lif.cep.fsm.TransitionOtherwise;
@@ -25,143 +27,89 @@ import ca.uqac.lif.cep.functions.Constant;
 import ca.uqac.lif.cep.functions.Function;
 import ca.uqac.lif.cep.functions.FunctionTree;
 import ca.uqac.lif.cep.functions.StreamVariable;
+import ca.uqac.lif.cep.tuples.GetAttribute;
+import ca.uqac.lif.cep.tuples.Tuple;
 
 public class EnvelopeMooreMachine extends MooreMachine
 {
-	// State names; this is just to improve readability
-	private static final int ST_0 = 0;
-	private static final int ST_1 = 1;
-	private static final int ST_2 = 2;
-	private static final int ST_3 = 3;
-	private static final int ST_4 = 4;
-	
-	public static enum State {TURN_ON, TURN_OFF}
-	
-	/**
-	 * Instantiates a Moore machine that recognizes an envelope on an
-	 * input signal.
-	 * @param app_name The name of the appliance
-	 * @param component The name of the electrical component to look for
-	 * @param peak The value (in watts) of the peak to be detected 
-	 * @param plateau The value of the plateau to be detected
-	 * @param drop The value of the drop to be detected
-	 * @param interval The interval of error. Any value in the open range
-	 *   ]x-interval, x+interval[ will fire the transition for x. 
-	 */
-	public EnvelopeMooreMachine(int peak, int plateau, int drop, int interval)
-	{
-		super(2, 1);
-		// Create transition relation
-		addTransition(ST_0, new FunctionTransition(// in state 0, event = peak, go to state 1
-		withinRange(peak, interval),
-				ST_1));
-		addTransition(ST_0,
-				// in state 0, event = otherwise, go to state 0
-				new TransitionOtherwise(ST_0));
-		addTransition(ST_1, new FunctionTransition(// in state 1, event = plateau, go to state 2
-		withinRange(plateau, interval),
-				ST_2));
-		addTransition(ST_1,
-				// in state 1, event = otherwise, go to state 1
-				new TransitionOtherwise(ST_1));
-		addTransition(ST_2, new FunctionTransition(// in state 2, event = drop, go to state 3
-		withinRange(drop, interval),
-				ST_3));
-		addTransition(ST_2,
-				// in state 2, event = otherwise, go to state 4
-				new TransitionOtherwise(ST_4));
-		addTransition(ST_3, new FunctionTransition(// in state 3, event = peak, go to state 1
-		withinRange(peak, interval),
-				ST_1));
-		addTransition(ST_3,
-				// in state 3, event = otherwise, go to state 0
-				new TransitionOtherwise(ST_0));
-		addTransition(ST_4, new FunctionTransition(// in state 4, event = drop, go to state 3
-		withinRange(drop, interval),
-				ST_3));
-		addTransition(ST_4,
-				// in state 4, event = otherwise, go to state 4
-				new TransitionOtherwise(ST_4));
-		// Add symbols to some states
-		addSymbol(ST_2, new Constant(State.TURN_ON));
-		addSymbol(ST_3, new Constant(State.TURN_ON));
-	}
+  // State names; this is just to improve readability
+  private static final int ST_0 = 0;
+  private static final int ST_1 = 1;
+  private static final int ST_2 = 2;
+  private static final int ST_3 = 3;
+  private static final int ST_4 = 4;
 
-	/**
-	 * Generate a transition expressing the fact that a value is within a range
-	 * @param value The value
-	 * @param interval The half-width of the range
-	 * @return The condition
-	 */
-	private static Function withinRange(int value, int interval)
-	{
-		FunctionTree ft = new FunctionTree(Numbers.isLessThan,
-				new FunctionTree(Numbers.absoluteValue,
-				    new FunctionTree(Numbers.subtraction,
-				        StreamVariable.X, new Constant(value))),
-				new Constant(interval));
-		return ft;
-	}
+  public static enum State {TURN_ON, TURN_OFF}
 
-	public static abstract class ApplianceEvent
-	{
-		private final String m_name;
+  public static enum SignalFeature {DROP, PEAK, PLATEAU}
 
-		private final String m_message;
+  protected Set<String> m_componentNames;
 
-		ApplianceEvent(String name, String message)
-		{
-			m_name = name;
-			m_message = message;
-		}
-		
-		public String getName()
-		{
-			return m_name;
-		}
-		
-		public String getMessage()
-		{
-			return m_message;
-		}
+  /**
+   * Instantiates a Moore machine that recognizes an envelope on an
+   * input signal.
+   * @param sig The signature of the appliance to detect
+   * @param interval The interval of error. Any value in the open range
+   *   ]x-interval, x+interval[ will fire the transition for x. 
+   */
+  public EnvelopeMooreMachine(ApplianceSignature sig, int interval)
+  {
+    super(1, 1);
 
-		@Override
-		public String toString()
-		{
-			return m_name + " " + m_message;
-		}
-	}
+    // Get the names of the signal components in this machine
+    m_componentNames = sig.getComponentNames();
 
-	public static class ApplianceOn extends ApplianceEvent
-	{
-		public ApplianceOn(String name)
-		{
-			super(name, "ON");
-		}
-	}
+    // Create transition relation
+    addTransition(ST_0, new FunctionTransition(// in state 0, event = peak, go to state 1
+        checkComponent(sig.getOnEnvelope(), SignalFeature.PEAK, interval),
+        ST_1));
+    addTransition(ST_0,
+        // in state 0, event = otherwise, go to state 0
+        new TransitionOtherwise(ST_0));
+    addTransition(ST_1, new FunctionTransition(// in state 1, event = plateau, go to state 2
+        checkComponent(sig.getOnEnvelope(), SignalFeature.PLATEAU, interval),
+        ST_2));
+    addTransition(ST_1,
+        // in state 1, event = otherwise, go to state 1
+        new TransitionOtherwise(ST_1));
+    addTransition(ST_2, new FunctionTransition(// in state 2, event = drop, go to state 3
+        checkComponent(sig.getOffEnvelope(), SignalFeature.DROP, interval),
+        ST_3));
+    addTransition(ST_2,
+        // in state 2, event = otherwise, go to state 2
+        new TransitionOtherwise(ST_2));
+    addTransition(ST_3,
+        // in state 3, event = otherwise, go to state 0
+        new TransitionOtherwise(ST_0));
+    // Add symbols to some states
+    addSymbol(ST_2, new Constant(State.TURN_ON));
+    addSymbol(ST_3, new Constant(State.TURN_ON));
+  }
 
-	public static class ApplianceOff extends ApplianceEvent
-	{
-		public ApplianceOff(String name)
-		{
-			super(name, "OFF");
-		}
-	}
-	
-	public static class Signature
-	{
-		public String m_component;
-		public int m_peak;
-		public int m_plateau;
-		public int m_drop;
-		
-		public Signature(String component, int peak, int plateau, int drop)
-		{
-			super();
-			m_component = component;
-			m_peak = peak;
-			m_plateau = plateau;
-			m_drop = drop;
-		}
-	}
+  protected FunctionTree checkComponent(Tuple sig, SignalFeature feature, int interval)
+  {
+    String component_suffix = "-T";
+    if (feature == SignalFeature.PEAK)
+    {
+      component_suffix = "-P";
+    }
+    FunctionTree big_and = new FunctionTree(Booleans.and);
+    big_and.setChild(0, new Constant(true));
+    for (String sig_comp : m_componentNames)
+    {
+      String attribute_name = sig_comp + component_suffix;
+      FunctionTree range = new FunctionTree(Numbers.isLessThan,
+          new FunctionTree(Numbers.absoluteValue,
+              new FunctionTree(Numbers.subtraction),
+              new Constant(sig.get(attribute_name)),
+              new FunctionTree(new GetAttribute(attribute_name), 
+                  StreamVariable.X)),
+          new Constant(interval));
+      big_and.setChild(1, range);
+      FunctionTree new_and = new FunctionTree(Booleans.and);
+      new_and.setChild(0, big_and);
+      big_and = new_and;
+    }
+    return big_and;
+  }
 }

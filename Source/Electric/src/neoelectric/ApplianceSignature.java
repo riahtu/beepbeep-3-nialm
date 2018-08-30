@@ -1,6 +1,8 @@
 package neoelectric;
 
 import ca.uqac.lif.cep.tuples.Tuple;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ApplianceSignature
 {
@@ -21,6 +23,21 @@ public class ApplianceSignature
     super();
     m_onEnvelope = on;
     m_offEnvelope = off;
+  }
+  
+  /**
+   * Gets the names of all the signal components mentioned in this signature.
+   * A signal component is, for example, "W1" or "VARL2". 
+   * @return The set of signal components
+   */
+  public Set<String> getComponentNames()
+  {
+    Set<String> comps = new HashSet<String>();
+    for (String s : m_onEnvelope.keySet())
+    {
+      comps.add(s.replaceAll("-.", ""));
+    }
+    return comps;
   }
   
   @Override

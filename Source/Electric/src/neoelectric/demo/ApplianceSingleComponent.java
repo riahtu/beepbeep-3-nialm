@@ -14,7 +14,7 @@ import ca.uqac.lif.cep.widgets.WidgetSink;
 import ca.uqac.lif.mtnp.plot.Plot.ImageType;
 import ca.uqac.lif.mtnp.plot.gnuplot.Scatterplot;
 import neoelectric.ProcessEnvelope;
-import neoelectric.SimulateAppliance;
+import neoelectric.SimulateComponent;
 
 import java.awt.FlowLayout;
 import java.io.InputStream;
@@ -23,12 +23,12 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-public class ApplianceSinglePhase
+public class ApplianceSingleComponent
 {
 	public static void main(String[] args)
 	{
-		InputStream is = ApplianceSinglePhase.class.getResourceAsStream("data/test-stutter.csv");
-		SimulateAppliance sm = new SimulateAppliance(is, 60f);
+		InputStream is = ApplianceSingleComponent.class.getResourceAsStream("data/test-stutter.csv");
+		SimulateComponent sm = new SimulateComponent(is, 60f);
 		Fork f1 = new Fork(3);
 		Connector.connect(sm, f1);
 		TurnInto one = new TurnInto(1);
