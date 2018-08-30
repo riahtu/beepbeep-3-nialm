@@ -27,10 +27,10 @@ import ca.uqac.lif.cep.functions.Constant;
 import ca.uqac.lif.cep.functions.Function;
 import ca.uqac.lif.cep.functions.FunctionTree;
 import ca.uqac.lif.cep.functions.StreamVariable;
-import ca.uqac.lif.cep.tuples.GetAttribute;
+import ca.uqac.lif.cep.tuples.FetchAttribute;
 import ca.uqac.lif.cep.tuples.Tuple;
 
-public class EnvelopeMooreMachine extends MooreMachine
+public class ApplianceMooreMachine extends MooreMachine
 {
   // State names; this is just to improve readability
   private static final int ST_0 = 0;
@@ -39,7 +39,7 @@ public class EnvelopeMooreMachine extends MooreMachine
   private static final int ST_3 = 3;
   private static final int ST_4 = 4;
 
-  public static enum State {TURN_ON, TURN_OFF}
+  public static enum State {NO_CHANGE, TURN_ON, TURN_OFF}
 
   public static enum SignalFeature {DROP, PEAK, PLATEAU}
 
@@ -52,7 +52,7 @@ public class EnvelopeMooreMachine extends MooreMachine
    * @param interval The interval of error. Any value in the open range
    *   ]x-interval, x+interval[ will fire the transition for x. 
    */
-  public EnvelopeMooreMachine(ApplianceSignature sig, int interval)
+  public ApplianceMooreMachine(ApplianceSignature sig, int interval)
   {
     super(1, 1);
 
@@ -72,42 +72,54 @@ public class EnvelopeMooreMachine extends MooreMachine
     addTransition(ST_1,
         // in state 1, event = otherwise, go to state 1
         new TransitionOtherwise(ST_1));
-    addTransition(ST_2, new FunctionTransition(// in state 2, event = drop, go to state 3
+    addTransition(ST_2, new FunctionTransition(// in state 2, event = drop, go to state 4
         checkComponent(sig.getOffEnvelope(), SignalFeature.DROP, interval),
-        ST_3));
+        ST_4));
     addTransition(ST_2,
-        // in state 2, event = otherwise, go to state 2
-        new TransitionOtherwise(ST_2));
+        // in state 2, event = otherwise, go to state 3
+        new TransitionOtherwise(ST_3));
+    addTransition(ST_3, new FunctionTransition(// in state 3, event = drop, go to state 4
+        checkComponent(sig.getOffEnvelope(), SignalFeature.DROP, interval),
+        ST_4));
     addTransition(ST_3,
-        // in state 3, event = otherwise, go to state 0
+        // in state 3, event = otherwise, go to state 3
+        new TransitionOtherwise(ST_3));
+    addTransition(ST_4,
+        // in state 4, event = otherwise, go to state 0
         new TransitionOtherwise(ST_0));
     // Add symbols to some states
+    addSymbol(ST_0, new Constant(State.NO_CHANGE));
+    addSymbol(ST_1, new Constant(State.NO_CHANGE));
     addSymbol(ST_2, new Constant(State.TURN_ON));
-    addSymbol(ST_3, new Constant(State.TURN_ON));
+    addSymbol(ST_3, new Constant(State.NO_CHANGE));
+    addSymbol(ST_4, new Constant(State.TURN_OFF));
   }
 
-  protected FunctionTree checkComponent(Tuple sig, SignalFeature feature, int interval)
+  protected Function checkComponent(Tuple sig, SignalFeature feature, int interval)
   {
     String component_suffix = "-T";
     if (feature == SignalFeature.PEAK)
     {
-      component_suffix = "-P";
+      component_suffix = "-K";
     }
-    FunctionTree big_and = new FunctionTree(Booleans.and);
-    big_and.setChild(0, new Constant(true));
+    Function big_and = new Constant(true);
     for (String sig_comp : m_componentNames)
     {
       String attribute_name = sig_comp + component_suffix;
-      FunctionTree range = new FunctionTree(Numbers.isLessThan,
-          new FunctionTree(Numbers.absoluteValue,
-              new FunctionTree(Numbers.subtraction),
-              new Constant(sig.get(attribute_name)),
-              new FunctionTree(new GetAttribute(attribute_name), 
-                  StreamVariable.X)),
-          new Constant(interval));
-      big_and.setChild(1, range);
+      if (!sig.containsKey(attribute_name))
+        continue;
       FunctionTree new_and = new FunctionTree(Booleans.and);
       new_and.setChild(0, big_and);
+
+      FunctionTree range = new FunctionTree(Numbers.isLessThan,
+          new FunctionTree(Numbers.absoluteValue,
+              new FunctionTree(Numbers.subtraction,
+                  new FunctionTree(
+                      new FetchAttribute(attribute_name), 
+                      StreamVariable.X),
+                  new Constant(sig.get(attribute_name)))),
+          new Constant(interval));
+      new_and.setChild(1, range);
       big_and = new_and;
     }
     return big_and;

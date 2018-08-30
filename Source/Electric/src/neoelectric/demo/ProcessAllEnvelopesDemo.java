@@ -2,17 +2,12 @@ package neoelectric.demo;
 
 import ca.uqac.lif.cep.Connector;
 import ca.uqac.lif.cep.functions.ApplyFunction;
-import ca.uqac.lif.cep.functions.Cumulate;
-import ca.uqac.lif.cep.functions.CumulativeFunction;
-import ca.uqac.lif.cep.functions.TurnInto;
 import ca.uqac.lif.cep.mtnp.DrawPlot;
 import ca.uqac.lif.cep.mtnp.UpdateTableMap;
-import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Pump;
 import ca.uqac.lif.cep.tuples.MergeTuples;
 import ca.uqac.lif.cep.tuples.ScalarIntoTuple;
-import ca.uqac.lif.cep.util.Numbers;
 import ca.uqac.lif.cep.widgets.WidgetSink;
 import ca.uqac.lif.mtnp.plot.Plot.ImageType;
 import ca.uqac.lif.mtnp.plot.gnuplot.Scatterplot;
