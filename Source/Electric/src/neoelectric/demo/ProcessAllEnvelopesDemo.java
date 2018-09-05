@@ -8,6 +8,7 @@ import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Pump;
 import ca.uqac.lif.cep.tuples.MergeTuples;
 import ca.uqac.lif.cep.tuples.ScalarIntoTuple;
+import ca.uqac.lif.cep.widgets.ToImageIcon;
 import ca.uqac.lif.cep.widgets.WidgetSink;
 import ca.uqac.lif.mtnp.plot.Plot.ImageType;
 import ca.uqac.lif.mtnp.plot.gnuplot.Scatterplot;
@@ -53,8 +54,10 @@ public class ProcessAllEnvelopesDemo
 		  label = new JLabel();
 	    panel.add(label);
 		}
+		ApplyFunction to_image = new ApplyFunction(ToImageIcon.instance);
+		Connector.connect(pump, to_image);
 		WidgetSink ws = new WidgetSink(label);
-		Connector.connect(pump, ws);
+		Connector.connect(to_image, ws);
 		frame.setVisible(true);
 		pump.start();
 	}
