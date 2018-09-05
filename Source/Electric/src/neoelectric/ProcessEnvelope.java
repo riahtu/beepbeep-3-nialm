@@ -3,7 +3,7 @@ package neoelectric;
 import ca.uqac.lif.cep.Connector;
 import ca.uqac.lif.cep.GroupProcessor;
 import ca.uqac.lif.cep.Processor;
-import ca.uqac.lif.cep.signal.Limiter;
+import ca.uqac.lif.cep.signal.Limit;
 import ca.uqac.lif.cep.signal.PeakFinderLocalMaximum;
 import ca.uqac.lif.cep.signal.Persist;
 import ca.uqac.lif.cep.signal.PlateauFinder;
@@ -27,7 +27,7 @@ public class ProcessEnvelope extends GroupProcessor
     Threshold peak_th = new Threshold(THRESHOLD);
     Connector.connect(peak_finder, peak_th);
     // Dampen to avoid double peaks
-    Processor peak_damper = new Limiter(10);
+    Processor peak_damper = new Limit(10);
     Connector.connect(peak_th, peak_damper);
     Persist peak_persist = new Persist(4);
     Connector.connect(peak_damper, peak_persist);
@@ -38,7 +38,7 @@ public class ProcessEnvelope extends GroupProcessor
     // Threshold to avoid finding plateaus due to noise
     Threshold plateau_th = new Threshold(THRESHOLD);
     Connector.connect(plateau_finder, plateau_th);
-    Processor plateau_damper = new Limiter(10);
+    Processor plateau_damper = new Limit(10);
     Connector.connect(plateau_th, plateau_damper);
     Persist plateau_persist = new Persist(4);
     Connector.connect(plateau_damper, plateau_persist);

@@ -44,7 +44,7 @@ import ca.uqac.lif.cep.io.ReadLines;
 import ca.uqac.lif.cep.signal.PeakFinderLocalMaximum;
 import ca.uqac.lif.cep.signal.PeakFinderTravelRise;
 import ca.uqac.lif.cep.signal.Threshold;
-import ca.uqac.lif.cep.signal.Limiter;
+import ca.uqac.lif.cep.signal.Limit;
 
 @SuppressWarnings({ "unused", "deprecation" })
 public class Learning

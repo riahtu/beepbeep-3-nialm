@@ -21,7 +21,7 @@ import ca.uqac.lif.cep.Connector;
 import ca.uqac.lif.cep.GroupProcessor;
 import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.functions.ApplyFunction;
-import ca.uqac.lif.cep.signal.Limiter;
+import ca.uqac.lif.cep.signal.Limit;
 import ca.uqac.lif.cep.signal.PlateauFinder;
 import ca.uqac.lif.cep.tuples.FetchAttribute;
 
@@ -46,7 +46,7 @@ class PlateauProcessor extends GroupProcessor
 		//Threshold th = new Threshold(threshold);
 		//Connector.connect(finder, th);
 		// Dampen to avoid double peaks
-		Processor damper = new Limiter(10);
+		Processor damper = new Limit(10);
 		Connector.connect(finder, damper);
 		// Bundle everything into a group
 		addProcessors(select, finder, damper);
