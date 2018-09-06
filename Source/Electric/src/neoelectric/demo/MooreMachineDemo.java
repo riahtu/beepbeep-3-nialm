@@ -25,7 +25,7 @@ import ca.uqac.lif.cep.tuples.TupleMap;
 import ca.uqac.lif.cep.util.Bags;
 import neoelectric.ApplianceSignature;
 import neoelectric.ApplianceMooreMachine;
-import neoelectric.ProcessAllEnvelopes;
+import neoelectric.ProcessAllEnvelopesTuple;
 import neoelectric.SimulateAppliance;
 
 public class MooreMachineDemo
@@ -48,7 +48,7 @@ public class MooreMachineDemo
     SimulateAppliance appl = new SimulateAppliance(ProcessAllEnvelopesDemo.class, "data/A1", "W1", "W2");
     
     
-    ProcessAllEnvelopes pae = new ProcessAllEnvelopes("W1", "W2");
+    ProcessAllEnvelopesTuple pae = new ProcessAllEnvelopesTuple("W1", "W2");
     Connector.connect(appl, 1, pae, 0);
     Connector.connect(appl, 2, pae, 1);
     ApplianceMooreMachine amm = new ApplianceMooreMachine(sig, 100);

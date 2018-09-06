@@ -12,7 +12,7 @@ import ca.uqac.lif.cep.widgets.ToImageIcon;
 import ca.uqac.lif.cep.widgets.WidgetSink;
 import ca.uqac.lif.mtnp.plot.Plot.ImageType;
 import ca.uqac.lif.mtnp.plot.gnuplot.Scatterplot;
-import neoelectric.ProcessAllEnvelopes;
+import neoelectric.ProcessAllEnvelopesTuple;
 import neoelectric.SimulateAppliance;
 
 import java.awt.FlowLayout;
@@ -28,7 +28,7 @@ public class ProcessAllEnvelopesDemo
 	  SimulateAppliance appl = new SimulateAppliance(ProcessAllEnvelopesDemo.class, "data/A1", "W1", "W2");
 	  ApplyFunction time_tup = new ApplyFunction(new ScalarIntoTuple("Time"));
     Connector.connect(appl, 0, time_tup, 0);
-		ProcessAllEnvelopes pae = new ProcessAllEnvelopes("W1", "W2");
+		ProcessAllEnvelopesTuple pae = new ProcessAllEnvelopesTuple("W1", "W2");
 		Connector.connect(appl, 1, pae, 0);
 		Connector.connect(appl, 2, pae, 1);
 		ApplyFunction merge_tup = new ApplyFunction(new MergeTuples());
