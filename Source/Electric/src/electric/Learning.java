@@ -32,7 +32,7 @@ import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.GroupProcessor;
 import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.Pullable;
-import ca.uqac.lif.cep.SingleProcessor;
+import ca.uqac.lif.cep.SynchronousProcessor;
 import ca.uqac.lif.cep.functions.ApplyFunction;
 import ca.uqac.lif.cep.tuples.ScalarIntoTuple;
 import ca.uqac.lif.cep.tuples.Select;

@@ -21,12 +21,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Queue;
-import ca.uqac.lif.cep.SingleProcessor;
+import ca.uqac.lif.cep.SynchronousProcessor;
 import ca.uqac.lif.cep.tuples.Tuple;
 import ca.uqac.lif.cep.tuples.TupleMap;
 import electric.ElectricMooreMachine.ApplianceEvent;
 
-public class SignalReconstructor extends SingleProcessor
+public class SignalReconstructor extends SynchronousProcessor
 {
 	protected List<String> m_loadNames;
 	

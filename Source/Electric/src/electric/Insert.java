@@ -18,10 +18,10 @@
 package electric;
 
 import ca.uqac.lif.cep.Processor;
-import ca.uqac.lif.cep.SingleProcessor;
+import ca.uqac.lif.cep.SynchronousProcessor;
 import java.util.Queue;
 
-public class Insert extends SingleProcessor
+public class Insert extends SynchronousProcessor
 {
   protected Object m_object;
   
